@@ -59,7 +59,7 @@
         #gaugeContainer { position: absolute; bottom: 0; left: 0; width: 100%; height: 8px; background: rgba(255,255,255,0.05); }
         #gauge { height: 100%; background: var(--danger); width: 0%; }
 
-        textarea#reportArea { width: 100%; height: 220px; background: rgba(0,0,0,0.3); color: #94a3b8; border: 1px solid #334155; border-radius: 14px; padding: 12px; font-family: monospace; font-size: 12px; margin-bottom: 10px; line-height: 1.5; }
+        textarea#reportArea { width: 100%; height: 220px; background: rgba(0,0,0,0.3); color: #94a3b8; border: 1px solid #334155; border-radius: 14px; padding: 12px; font-family: monospace; font-size: 12px; margin-bottom: 10px; line-height: 1.5; outline: none; }
     </style>
 </head>
 <body>
@@ -103,14 +103,6 @@
                 </div>
             </div>
             <div class="param-row">
-                <span class="param-title">読了後の待ち時間</span>
-                <div class="ctrl-btns">
-                    <button class="step-btn" onclick="changeVal('engTime', -0.1)">-</button>
-                    <div id="disp_engTime" class="val-display">0.5</div>
-                    <button class="step-btn" onclick="changeVal('engTime', 0.1)">+</button>
-                </div>
-            </div>
-            <div class="param-row">
                 <span class="param-title">解答制限時間</span>
                 <div class="ctrl-btns">
                     <button class="step-btn" onclick="changeVal('japTime', -0.1)">-</button>
@@ -148,7 +140,7 @@
         <h1>修行完了</h1>
         <div id="resultScore" style="font-size:24px; font-weight:900; margin:10px 0; color:var(--success);"></div>
         <textarea id="reportArea" readonly></textarea>
-        <button class="main-btn copy-btn" onclick="copyReport()">結果と誤答リストをコピー</button>
+        <button class="main-btn copy-btn" onclick="copyReport()">修行記録を一括コピー</button>
         <button id="retryMissedBtn" class="main-btn retry-btn" onclick="retryMissed()">間違えた単語だけで再修行</button>
         <button class="main-btn" onclick="location.reload()">トップに戻る</button>
     </div>
@@ -713,7 +705,7 @@ honor an employee,従業員を表彰する555
 a six-piece assortment,6個入りの詰め合わせ556
 substitute butter for vegetable oil,植物油の代わりにバターを使う557
 relocate an office,事務所を移転する558
-Tex was reluctant to talk about it.,テックスはそれについて話したがらなかっ559
+Tex was reluctant to talk about it.,テックスはそれについて話したがらなかった559
 dispose of garbage,ごみを処分する560
 work independently and as a team member,単独でもチームの一員としても働く561
 The problems all stem from Tex.,その問題はすべてテックスに起因する562
@@ -1622,7 +1614,7 @@ let params = {
     rangeStart: 1,
     rangeEnd: 1462,
     speechRate: 1.4,
-    engTime: 0.5,
+    engTime: 0,
     japTime: 1.0
 };
 
@@ -1632,7 +1624,7 @@ let lastMissed = [];
 let sessionStartTime, sessionEndTime;
 
 window.onload = () => {
-    const saved = localStorage.getItem("teppeki_gold_v3");
+    const saved = localStorage.getItem("teppeki_gold_v4");
     if(saved) params = {...params, ...JSON.parse(saved)};
     updateAllDisplays();
     renderSections();
@@ -1644,7 +1636,7 @@ function changeVal(key, step) {
     if(key.includes('range')) params[key] = Math.max(1, Math.round(params[key]));
     if(key === 'rangeEnd') params[key] = Math.min(params[key], 1462);
     updateAllDisplays();
-    localStorage.setItem("teppeki_gold_v3", JSON.stringify(params));
+    localStorage.setItem("teppeki_gold_v4", JSON.stringify(params));
 }
 
 function updateAllDisplays() {
@@ -1707,18 +1699,18 @@ function nextWord() {
     gauge.style.transition = "none";
     gauge.style.width = "0%";
 
-    speakThenShowAnswer(activeWord.en);
+    speakEnglish(activeWord.en);
 }
 
-function speakThenShowAnswer(text) {
+function speakEnglish(text) {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "en-US";
     u.rate = params.speechRate;
 
     u.onend = () => {
-        clearTimeout(engTimer);
-        engTimer = setTimeout(showAnswer, params.engTime * 1000);
+        // 読み上げ終了の瞬間に日本語を表示
+        showAnswer();
     };
 
     speechSynthesis.speak(u);
@@ -1742,7 +1734,6 @@ function showAnswer() {
 
 function processAnswer(isCorrect) {
     speechSynthesis.cancel();
-    clearTimeout(engTimer);
     clearTimeout(japTimer);
     trainingResults.push({ ...activeWord, ok: isCorrect });
     nextWord();
