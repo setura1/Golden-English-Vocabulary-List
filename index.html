@@ -41,7 +41,7 @@
         button.main-btn { width: 100%; height: 58px; border: none; border-radius: 18px; font-size: 20px; font-weight: 900; cursor: pointer; margin-top: 10px; background: var(--primary); color: white; transition: background 0.2s; }
         button.main-btn:active { opacity: 0.8; }
         .retry-btn { background: var(--danger) !important; }
-        .copy-btn { background: var(--gray) !important; font-size: 14px !important; height: 40px !important; }
+        .copy-btn { background: var(--success) !important; font-size: 14px !important; height: 40px !important; }
         
         #app { position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 20px; z-index: 100; }
         #card { flex: 1; background: var(--container); border-radius: 40px; margin: 20px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 30px; text-align: center; border: 2px solid #334155; }
@@ -59,7 +59,7 @@
         #gaugeContainer { position: absolute; bottom: 0; left: 0; width: 100%; height: 8px; background: rgba(255,255,255,0.05); }
         #gauge { height: 100%; background: var(--danger); width: 0%; }
 
-        textarea#missedArea { width: 100%; height: 180px; background: rgba(0,0,0,0.3); color: #94a3b8; border: 1px solid #334155; border-radius: 14px; padding: 12px; font-family: monospace; font-size: 12px; margin-bottom: 10px; }
+        textarea#reportArea { width: 100%; height: 220px; background: rgba(0,0,0,0.3); color: #94a3b8; border: 1px solid #334155; border-radius: 14px; padding: 12px; font-family: monospace; font-size: 12px; margin-bottom: 10px; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -146,9 +146,9 @@
 <div id="report">
     <div class="container" style="text-align:center;">
         <h1>修行完了</h1>
-        <div id="resultScore" style="font-size:24px; font-weight:900; margin:20px 0; color:var(--success);"></div>
-        <textarea id="missedArea" readonly></textarea>
-        <button class="main-btn copy-btn" onclick="copyMissed()">間違えた単語をコピー</button>
+        <div id="resultScore" style="font-size:24px; font-weight:900; margin:10px 0; color:var(--success);"></div>
+        <textarea id="reportArea" readonly></textarea>
+        <button class="main-btn copy-btn" onclick="copyReport()">結果と誤答リストをコピー</button>
         <button id="retryMissedBtn" class="main-btn retry-btn" onclick="retryMissed()">間違えた単語だけで再修行</button>
         <button class="main-btn" onclick="location.reload()">トップに戻る</button>
     </div>
@@ -496,7 +496,7 @@ awards ceremony,授賞式338
 a high concentration of restaurants,飲食店の密集339
 without permission,許可なく340
 a family-owned firm,同族経営の会社341
-The scholarship enabled Tex to study abroad,その奨学金のおかげでテックスは留学できた342
+The scholarship enabled Tex to study abroad,その奨学金のおけでテックスは留学できた342
 checked luggage,預け荷物343
 Please fasten your seat belts,シートベルトをお締めください344
 Can I borrow your stapler?,ホッチキスをお借りできますか345
@@ -713,7 +713,7 @@ honor an employee,従業員を表彰する555
 a six-piece assortment,6個入りの詰め合わせ556
 substitute butter for vegetable oil,植物油の代わりにバターを使う557
 relocate an office,事務所を移転する558
-Tex was reluctant to talk about it.,テックスはそれについて話したがらなかった559
+Tex was reluctant to talk about it.,テックスはそれについて話したがらなかっ559
 dispose of garbage,ごみを処分する560
 work independently and as a team member,単独でもチームの一員としても働く561
 The problems all stem from Tex.,その問題はすべてテックスに起因する562
@@ -737,7 +737,7 @@ My driver's license expires in April.,私の運転免許証は4月に切れる57
 the sales outlook,売上見通し580
 generous contributions to a charity,慈善団体への多額の寄付581
 Each room is equipped with Internet access.,各部屋にはインターネット接続設備がある582
-install a new printer,新しいプリンターを設置するDocument583
+install a new printer,新しいプリンターを設置する583
 ask for a prescription,処方箋を求める584
 recipients of the prize,受賞者585
 the new recruits,新入社員586
@@ -1629,9 +1629,10 @@ let params = {
 let currentQueue = [], trainingResults = [], activeWord = null;
 let engTimer = null, japTimer = null;
 let lastMissed = [];
+let sessionStartTime, sessionEndTime;
 
 window.onload = () => {
-    const saved = localStorage.getItem("teppeki_gold_v2");
+    const saved = localStorage.getItem("teppeki_gold_v3");
     if(saved) params = {...params, ...JSON.parse(saved)};
     updateAllDisplays();
     renderSections();
@@ -1643,7 +1644,7 @@ function changeVal(key, step) {
     if(key.includes('range')) params[key] = Math.max(1, Math.round(params[key]));
     if(key === 'rangeEnd') params[key] = Math.min(params[key], 1462);
     updateAllDisplays();
-    localStorage.setItem("teppeki_gold_v2", JSON.stringify(params));
+    localStorage.setItem("teppeki_gold_v3", JSON.stringify(params));
 }
 
 function updateAllDisplays() {
@@ -1682,6 +1683,7 @@ function initTraining() {
 }
 
 function startSession(targets) {
+    sessionStartTime = new Date();
     currentQueue = [...targets].sort(() => Math.random() - 0.5);
     trainingResults = [];
     document.getElementById("setup").style.display = "none";
@@ -1705,7 +1707,6 @@ function nextWord() {
     gauge.style.transition = "none";
     gauge.style.width = "0%";
 
-    // 英語読み上げを開始し、終了後に解答タイマーを動かす
     speakThenShowAnswer(activeWord.en);
 }
 
@@ -1716,7 +1717,6 @@ function speakThenShowAnswer(text) {
     u.rate = params.speechRate;
 
     u.onend = () => {
-        // 読み上げ終了後、engTime秒待ってから日本語を表示
         clearTimeout(engTimer);
         engTimer = setTimeout(showAnswer, params.engTime * 1000);
     };
@@ -1727,7 +1727,6 @@ function speakThenShowAnswer(text) {
 function showAnswer() {
     document.getElementById("japaneseWord").textContent = activeWord.ja;
     
-    // 日本語も読み上げる
     const uJa = new SpeechSynthesisUtterance(activeWord.ja);
     uJa.lang = "ja-JP";
     uJa.rate = params.speechRate;
@@ -1750,25 +1749,36 @@ function processAnswer(isCorrect) {
 }
 
 function finishTraining() {
+    sessionEndTime = new Date();
     document.getElementById("app").style.display = "none";
     document.getElementById("report").style.display = "block";
     lastMissed = trainingResults.filter(r => !r.ok);
     
-    const scoreEl = document.getElementById("resultScore");
-    scoreEl.textContent = `正解: ${trainingResults.length - lastMissed.length} / ${trainingResults.length}`;
+    const total = trainingResults.length;
+    const correctCount = total - lastMissed.length;
+    const rate = (correctCount / total * 100).toFixed(1);
     
-    const missedArea = document.getElementById("missedArea");
-    missedArea.value = lastMissed.map(m => `${m.en},${m.ja}`).join("\n");
+    document.getElementById("resultScore").textContent = `正解: ${correctCount} / ${total} (${rate}%)`;
     
+    const reportArea = document.getElementById("reportArea");
+    let reportText = `修行記録\n`;
+    reportText += `開始: ${sessionStartTime.toLocaleString()}\n`;
+    reportText += `終了: ${sessionEndTime.toLocaleString()}\n`;
+    reportText += `正答率: ${rate}% (${correctCount}/${total})\n`;
+    reportText += `-------------------\n`;
+    reportText += `【間違えた単語リスト】\n`;
+    reportText += lastMissed.map(m => `${m.en},${m.ja}`).join("\n");
+    
+    reportArea.value = reportText;
     document.getElementById("retryMissedBtn").style.display = lastMissed.length > 0 ? "block" : "none";
 }
 
-function copyMissed() {
-    const missedArea = document.getElementById("missedArea");
-    if (!missedArea.value) return alert("コピーする単語がありません");
-    missedArea.select();
+function copyReport() {
+    const reportArea = document.getElementById("reportArea");
+    if (!reportArea.value) return alert("コピーする内容がありません");
+    reportArea.select();
     document.execCommand("copy");
-    alert("間違えた単語をコピーしました");
+    alert("統計と誤答リストをコピーしました");
 }
 
 function retryMissed() {
