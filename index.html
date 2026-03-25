@@ -41,7 +41,7 @@
         button.main-btn { width: 100%; height: 58px; border: none; border-radius: 18px; font-size: 20px; font-weight: 900; cursor: pointer; margin-top: 10px; background: var(--primary); color: white; transition: background 0.2s; }
         button.main-btn:active { opacity: 0.8; }
         .retry-btn { background: var(--danger) !important; }
-        .copy-btn { background: var(--success) !important; font-size: 14px !important; height: 40px !important; }
+        .copy-btn { background: var(--success) !important; font-size: 16px !important; }
         
         #app { position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 20px; z-index: 100; }
         #card { flex: 1; background: var(--container); border-radius: 40px; margin: 20px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 30px; text-align: center; border: 2px solid #334155; }
@@ -59,7 +59,7 @@
         #gaugeContainer { position: absolute; bottom: 0; left: 0; width: 100%; height: 8px; background: rgba(255,255,255,0.05); }
         #gauge { height: 100%; background: var(--danger); width: 0%; }
 
-        textarea#reportArea { width: 100%; height: 220px; background: rgba(0,0,0,0.3); color: #94a3b8; border: 1px solid #334155; border-radius: 14px; padding: 12px; font-family: monospace; font-size: 12px; margin-bottom: 10px; line-height: 1.5; outline: none; }
+        textarea#reportArea { width: 100%; height: 250px; background: rgba(0,0,0,0.3); color: #94a3b8; border: 1px solid #334155; border-radius: 14px; padding: 12px; font-family: monospace; font-size: 12px; margin-bottom: 10px; line-height: 1.5; outline: none; }
     </style>
 </head>
 <body>
@@ -92,7 +92,7 @@
             </div>
         </div>
 
-        <div class="label">速度・時間管理 (秒)</div>
+        <div class="label">速度・解答期限 (秒)</div>
         <div class="param-group">
             <div class="param-row">
                 <span class="param-title">読み上げ速度</span>
@@ -140,7 +140,7 @@
         <h1>修行完了</h1>
         <div id="resultScore" style="font-size:24px; font-weight:900; margin:10px 0; color:var(--success);"></div>
         <textarea id="reportArea" readonly></textarea>
-        <button class="main-btn copy-btn" onclick="copyReport()">修行記録を一括コピー</button>
+        <button class="main-btn copy-btn" onclick="copyReport()">結果と誤答リストをコピー</button>
         <button id="retryMissedBtn" class="main-btn retry-btn" onclick="retryMissed()">間違えた単語だけで再修行</button>
         <button class="main-btn" onclick="location.reload()">トップに戻る</button>
     </div>
@@ -729,7 +729,7 @@ My driver's license expires in April.,私の運転免許証は4月に切れる57
 the sales outlook,売上見通し580
 generous contributions to a charity,慈善団体への多額の寄付581
 Each room is equipped with Internet access.,各部屋にはインターネット接続設備がある582
-install a new printer,新しいプリンターを設置する583
+install a new printer,新しいプリンターを設置するDocument583
 ask for a prescription,処方箋を求める584
 recipients of the prize,受賞者585
 the new recruits,新入社員586
@@ -844,7 +844,7 @@ specifications for the project,その計画の仕様694
 confidential materials,機密資料695
 the fund-raising dinner,資金集めの夕食会696
 garment manufacturers,衣料品メーカー697
-Tex attributes his success to luck.,テックスは自分の成功を運のおかげだと考えている698
+Tex attributes his success to luck.,テックスは自分の成功を運のおげだと考えている698
 a vacant unit in an apartment building,マンションの空室699
 She will reportedly play the lead role.,彼女が主役を演じると伝えられている700
 state-of-the-art equipment,最先端設備701
@@ -1541,7 +1541,7 @@ All members present agreed.,出席者全員が賛成した1391
 the present address,現在の住所1392
 All our products are produced locally.,当社の製品はすべて地元で生産されている1393
 the produce section of a supermarket,スーパーの青果売り場1394
-professional advice,専門的助言1395
+professional advice,専門付助言1395
 professional achievements,職業上の業績1396
 professional behavior,職業人としての態度1397
 project that sales will increase by 10%,売上が10パーセント増えると予測する1398
@@ -1614,7 +1614,6 @@ let params = {
     rangeStart: 1,
     rangeEnd: 1462,
     speechRate: 1.4,
-    engTime: 0,
     japTime: 1.0
 };
 
@@ -1624,7 +1623,7 @@ let lastMissed = [];
 let sessionStartTime, sessionEndTime;
 
 window.onload = () => {
-    const saved = localStorage.getItem("teppeki_gold_v4");
+    const saved = localStorage.getItem("teppeki_gold_v5");
     if(saved) params = {...params, ...JSON.parse(saved)};
     updateAllDisplays();
     renderSections();
@@ -1636,7 +1635,7 @@ function changeVal(key, step) {
     if(key.includes('range')) params[key] = Math.max(1, Math.round(params[key]));
     if(key === 'rangeEnd') params[key] = Math.min(params[key], 1462);
     updateAllDisplays();
-    localStorage.setItem("teppeki_gold_v4", JSON.stringify(params));
+    localStorage.setItem("teppeki_gold_v5", JSON.stringify(params));
 }
 
 function updateAllDisplays() {
@@ -1709,7 +1708,6 @@ function speakEnglish(text) {
     u.rate = params.speechRate;
 
     u.onend = () => {
-        // 読み上げ終了の瞬間に日本語を表示
         showAnswer();
     };
 
@@ -1747,15 +1745,17 @@ function finishTraining() {
     
     const total = trainingResults.length;
     const correctCount = total - lastMissed.length;
-    const rate = (correctCount / total * 100).toFixed(1);
+    const correctRate = (correctCount / total * 100).toFixed(1);
+    const missedRate = (lastMissed.length / total * 100).toFixed(1);
     
-    document.getElementById("resultScore").textContent = `正解: ${correctCount} / ${total} (${rate}%)`;
+    document.getElementById("resultScore").textContent = `正解: ${correctCount} / ${total} (${correctRate}%)`;
     
     const reportArea = document.getElementById("reportArea");
-    let reportText = `修行記録\n`;
+    let reportText = `【修行記録】\n`;
     reportText += `開始: ${sessionStartTime.toLocaleString()}\n`;
     reportText += `終了: ${sessionEndTime.toLocaleString()}\n`;
-    reportText += `正答率: ${rate}% (${correctCount}/${total})\n`;
+    reportText += `正答率: ${correctRate}%\n`;
+    reportText += `誤答率: ${missedRate}%\n`;
     reportText += `-------------------\n`;
     reportText += `【間違えた単語リスト】\n`;
     reportText += lastMissed.map(m => `${m.en},${m.ja}`).join("\n");
@@ -1769,7 +1769,7 @@ function copyReport() {
     if (!reportArea.value) return alert("コピーする内容がありません");
     reportArea.select();
     document.execCommand("copy");
-    alert("統計と誤答リストをコピーしました");
+    alert("記録と誤答リストをコピーしました");
 }
 
 function retryMissed() {
