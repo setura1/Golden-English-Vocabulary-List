@@ -103,10 +103,10 @@
                 </div>
             </div>
             <div class="param-row">
-                <span class="param-title">英語表示時間</span>
+                <span class="param-title">読了後の待ち時間</span>
                 <div class="ctrl-btns">
                     <button class="step-btn" onclick="changeVal('engTime', -0.1)">-</button>
-                    <div id="disp_engTime" class="val-display">1.0</div>
+                    <div id="disp_engTime" class="val-display">0.5</div>
                     <button class="step-btn" onclick="changeVal('engTime', 0.1)">+</button>
                 </div>
             </div>
@@ -146,7 +146,7 @@
 <div id="report">
     <div class="container" style="text-align:center;">
         <h1>修行完了</h1>
-        <div id="resultScore" style="font-size:24px; font-weight:900; margin:10px 0; color:var(--success);"></div>
+        <div id="resultScore" style="font-size:24px; font-weight:900; margin:20px 0; color:var(--success);"></div>
         <textarea id="missedArea" readonly></textarea>
         <button class="main-btn copy-btn" onclick="copyMissed()">間違えた単語をコピー</button>
         <button id="retryMissedBtn" class="main-btn retry-btn" onclick="retryMissed()">間違えた単語だけで再修行</button>
@@ -737,7 +737,7 @@ My driver's license expires in April.,私の運転免許証は4月に切れる57
 the sales outlook,売上見通し580
 generous contributions to a charity,慈善団体への多額の寄付581
 Each room is equipped with Internet access.,各部屋にはインターネット接続設備がある582
-install a new printer,新しいプリンターを設置する583
+install a new printer,新しいプリンターを設置するDocument583
 ask for a prescription,処方箋を求める584
 recipients of the prize,受賞者585
 the new recruits,新入社員586
@@ -1622,7 +1622,7 @@ let params = {
     rangeStart: 1,
     rangeEnd: 1462,
     speechRate: 1.4,
-    engTime: 1.0,
+    engTime: 0.5,
     japTime: 1.0
 };
 
@@ -1639,7 +1639,7 @@ window.onload = () => {
 
 function changeVal(key, step) {
     params[key] = parseFloat((params[key] + step).toFixed(1));
-    if(params[key] < 0.1) params[key] = 0.1;
+    if(params[key] < 0) params[key] = 0; 
     if(key.includes('range')) params[key] = Math.max(1, Math.round(params[key]));
     if(key === 'rangeEnd') params[key] = Math.min(params[key], 1462);
     updateAllDisplays();
@@ -1705,15 +1705,33 @@ function nextWord() {
     gauge.style.transition = "none";
     gauge.style.width = "0%";
 
-    speak(activeWord.en, "en-US");
+    // 英語読み上げを開始し、終了後に解答タイマーを動かす
+    speakThenShowAnswer(activeWord.en);
+}
 
-    clearTimeout(engTimer);
-    engTimer = setTimeout(showAnswer, params.engTime * 1000);
+function speakThenShowAnswer(text) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US";
+    u.rate = params.speechRate;
+
+    u.onend = () => {
+        // 読み上げ終了後、engTime秒待ってから日本語を表示
+        clearTimeout(engTimer);
+        engTimer = setTimeout(showAnswer, params.engTime * 1000);
+    };
+
+    speechSynthesis.speak(u);
 }
 
 function showAnswer() {
     document.getElementById("japaneseWord").textContent = activeWord.ja;
-    speak(activeWord.ja, "ja-JP");
+    
+    // 日本語も読み上げる
+    const uJa = new SpeechSynthesisUtterance(activeWord.ja);
+    uJa.lang = "ja-JP";
+    uJa.rate = params.speechRate;
+    speechSynthesis.speak(uJa);
 
     const gauge = document.getElementById("gauge");
     gauge.style.transition = `width ${params.japTime}s linear`;
@@ -1724,18 +1742,11 @@ function showAnswer() {
 }
 
 function processAnswer(isCorrect) {
+    speechSynthesis.cancel();
     clearTimeout(engTimer);
     clearTimeout(japTimer);
     trainingResults.push({ ...activeWord, ok: isCorrect });
     nextWord();
-}
-
-function speak(text, lang) {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = lang;
-    u.rate = params.speechRate;
-    speechSynthesis.speak(u);
 }
 
 function finishTraining() {
