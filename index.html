@@ -38,7 +38,10 @@
         .section-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; margin-bottom: 20px; }
         .nav-item { font-size: 11px; padding: 8px 0; background: var(--gray); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        button.main-btn { width: 100%; height: 58px; border: none; border-radius: 18px; font-size: 20px; font-weight: 900; cursor: pointer; margin-top: 20px; background: var(--primary); color: white; }
+        button.main-btn { width: 100%; height: 58px; border: none; border-radius: 18px; font-size: 20px; font-weight: 900; cursor: pointer; margin-top: 10px; background: var(--primary); color: white; transition: background 0.2s; }
+        button.main-btn:active { opacity: 0.8; }
+        .retry-btn { background: var(--danger) !important; }
+        .copy-btn { background: var(--gray) !important; font-size: 14px !important; height: 40px !important; }
         
         #app { position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 20px; z-index: 100; }
         #card { flex: 1; background: var(--container); border-radius: 40px; margin: 20px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 30px; text-align: center; border: 2px solid #334155; }
@@ -56,7 +59,7 @@
         #gaugeContainer { position: absolute; bottom: 0; left: 0; width: 100%; height: 8px; background: rgba(255,255,255,0.05); }
         #gauge { height: 100%; background: var(--danger); width: 0%; }
 
-        textarea#missedArea { width: 100%; height: 200px; background: rgba(0,0,0,0.3); color: #94a3b8; border: 1px solid #334155; border-radius: 14px; padding: 12px; font-family: monospace; font-size: 12px; }
+        textarea#missedArea { width: 100%; height: 180px; background: rgba(0,0,0,0.3); color: #94a3b8; border: 1px solid #334155; border-radius: 14px; padding: 12px; font-family: monospace; font-size: 12px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -95,7 +98,7 @@
                 <span class="param-title">読み上げ速度</span>
                 <div class="ctrl-btns">
                     <button class="step-btn" onclick="changeVal('speechRate', -0.1)">-</button>
-                    <div id="disp_speechRate" class="val-display">1.6</div>
+                    <div id="disp_speechRate" class="val-display">1.4</div>
                     <button class="step-btn" onclick="changeVal('speechRate', 0.1)">+</button>
                 </div>
             </div>
@@ -143,8 +146,10 @@
 <div id="report">
     <div class="container" style="text-align:center;">
         <h1>修行完了</h1>
-        <div id="resultScore" style="font-size:24px; font-weight:900; margin:20px 0; color:var(--success);"></div>
+        <div id="resultScore" style="font-size:24px; font-weight:900; margin:10px 0; color:var(--success);"></div>
         <textarea id="missedArea" readonly></textarea>
+        <button class="main-btn copy-btn" onclick="copyMissed()">間違えた単語をコピー</button>
+        <button id="retryMissedBtn" class="main-btn retry-btn" onclick="retryMissed()">間違えた単語だけで再修行</button>
         <button class="main-btn" onclick="location.reload()">トップに戻る</button>
     </div>
 </div>
@@ -732,7 +737,7 @@ My driver's license expires in April.,私の運転免許証は4月に切れる57
 the sales outlook,売上見通し580
 generous contributions to a charity,慈善団体への多額の寄付581
 Each room is equipped with Internet access.,各部屋にはインターネット接続設備がある582
-install a new printer,新しいプリンターを設置するDocument583
+install a new printer,新しいプリンターを設置する583
 ask for a prescription,処方箋を求める584
 recipients of the prize,受賞者585
 the new recruits,新入社員586
@@ -1130,7 +1135,7 @@ deplete the budget,予算を使い果たす977
 the proprietor of a clothing shop,衣料品店の店主978
 copyright infringement,著作権侵害979
 We will waive the shipping charge.,送料は免除します980
-alleviate traffic congestion,交通渋渋緩和する981
+alleviate traffic congestion,交通渋滞を緩和する981
 an avid reader,熱心な読書家982
 a gala dinner,祝賀晩餐会983
 a stagnant market,停滞した市場984
@@ -1616,16 +1621,17 @@ of all the works in the museum,美術館の全作品のうち1462`;
 let params = {
     rangeStart: 1,
     rangeEnd: 1462,
-    speechRate: 1.6,
+    speechRate: 1.4,
     engTime: 1.0,
     japTime: 1.0
 };
 
 let currentQueue = [], trainingResults = [], activeWord = null;
 let engTimer = null, japTimer = null;
+let lastMissed = [];
 
 window.onload = () => {
-    const saved = localStorage.getItem("teppeki_gold_v1");
+    const saved = localStorage.getItem("teppeki_gold_v2");
     if(saved) params = {...params, ...JSON.parse(saved)};
     updateAllDisplays();
     renderSections();
@@ -1637,7 +1643,7 @@ function changeVal(key, step) {
     if(key.includes('range')) params[key] = Math.max(1, Math.round(params[key]));
     if(key === 'rangeEnd') params[key] = Math.min(params[key], 1462);
     updateAllDisplays();
-    localStorage.setItem("teppeki_gold_v1", JSON.stringify(params));
+    localStorage.setItem("teppeki_gold_v2", JSON.stringify(params));
 }
 
 function updateAllDisplays() {
@@ -1672,10 +1678,14 @@ function initTraining() {
     });
 
     if(targets.length === 0) return alert("範囲が正しくありません");
+    startSession(targets);
+}
 
-    currentQueue = targets.sort(() => Math.random() - 0.5);
+function startSession(targets) {
+    currentQueue = [...targets].sort(() => Math.random() - 0.5);
     trainingResults = [];
     document.getElementById("setup").style.display = "none";
+    document.getElementById("report").style.display = "none";
     document.getElementById("app").style.display = "flex";
     nextWord();
 }
@@ -1731,9 +1741,28 @@ function speak(text, lang) {
 function finishTraining() {
     document.getElementById("app").style.display = "none";
     document.getElementById("report").style.display = "block";
-    const missed = trainingResults.filter(r => !r.ok);
-    document.getElementById("resultScore").textContent = `正解: ${trainingResults.length - missed.length} / ${trainingResults.length}`;
-    document.getElementById("missedArea").value = missed.map(m => `${m.en},${m.ja}`).join("\n");
+    lastMissed = trainingResults.filter(r => !r.ok);
+    
+    const scoreEl = document.getElementById("resultScore");
+    scoreEl.textContent = `正解: ${trainingResults.length - lastMissed.length} / ${trainingResults.length}`;
+    
+    const missedArea = document.getElementById("missedArea");
+    missedArea.value = lastMissed.map(m => `${m.en},${m.ja}`).join("\n");
+    
+    document.getElementById("retryMissedBtn").style.display = lastMissed.length > 0 ? "block" : "none";
+}
+
+function copyMissed() {
+    const missedArea = document.getElementById("missedArea");
+    if (!missedArea.value) return alert("コピーする単語がありません");
+    missedArea.select();
+    document.execCommand("copy");
+    alert("間違えた単語をコピーしました");
+}
+
+function retryMissed() {
+    if (lastMissed.length === 0) return;
+    startSession(lastMissed);
 }
 
 document.onkeydown = (e) => {
