@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+    <title>TOEIC金の英単語 1462 修行版</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --container: #1e293b;
+            --text: #f1f5f9;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --gray: #64748b;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); font-family: 'Helvetica Neue', Arial, sans-serif; color: var(--text); }
+        
+        #setup, #report { padding: 20px; min-height: 100vh; overflow-y: auto; }
+        #setup { display: block; }
+        #report, #app { display: none; }
+
+        .container { max-width: 650px; margin: 0 auto; background: var(--container); border-radius: 28px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { font-size: 20px; text-align: center; margin-bottom: 20px; font-weight: 900; }
+        .label { font-size: 13px; font-weight: 800; color: var(--gray); margin: 15px 0 6px 4px; }
+        
+        .param-group { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 16px; margin-bottom: 10px; border: 1px solid #334155; }
+        .param-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+        .param-title { font-size: 12px; font-weight: 800; color: var(--text); }
+        
+        .ctrl-btns { display: flex; align-items: center; gap: 8px; }
+        .val-display { min-width: 50px; text-align: center; font-family: monospace; font-weight: 900; font-size: 16px; color: var(--primary); }
+        
+        .step-btn { width: 36px; height: 36px; background: #334155; border: none; border-radius: 10px; color: white; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .step-btn:active { background: var(--primary); }
+
+        .section-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; margin-bottom: 20px; }
+        .nav-item { font-size: 11px; padding: 8px 0; background: var(--gray); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+        button.main-btn { width: 100%; height: 58px; border: none; border-radius: 18px; font-size: 20px; font-weight: 900; cursor: pointer; margin-top: 20px; background: var(--primary); color: white; }
+        
+        #app { position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 20px; z-index: 100; }
+        #card { flex: 1; background: var(--container); border-radius: 40px; margin: 20px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 30px; text-align: center; border: 2px solid #334155; }
+        #englishWord { font-size: 32px; font-weight: 900; line-height: 1.2; }
+        #japaneseWord { font-size: 24px; margin-top: 25px; color: var(--primary); font-weight: 700; min-height: 1.2em; }
+        
+        .progress-container { width: 100%; height: 10px; background: #334155; border-radius: 5px; overflow: hidden; }
+        #progressBar { height: 100%; background: var(--primary); width: 0%; transition: width 0.2s; }
+        
+        .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
+        .ans-btn { height: 74px; border: none; border-radius: 24px; color: white; font-size: 22px; font-weight: 900; cursor: pointer; }
+        #correctBtn { background: var(--success); }
+        #wrongBtn { background: var(--danger); }
+        
+        #gaugeContainer { position: absolute; bottom: 0; left: 0; width: 100%; height: 8px; background: rgba(255,255,255,0.05); }
+        #gauge { height: 100%; background: var(--danger); width: 0%; }
+
+        textarea#missedArea { width: 100%; height: 200px; background: rgba(0,0,0,0.3); color: #94a3b8; border: 1px solid #334155; border-radius: 14px; padding: 12px; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div id="setup">
+    <div class="container">
+        <h1>TOEIC金の英単語 1462</h1>
+        
+        <div class="label">修行範囲設定</div>
+        <div class="param-group">
+            <div class="param-row">
+                <span class="param-title">開始番号</span>
+                <div class="ctrl-btns">
+                    <button class="step-btn" onclick="changeVal('rangeStart', -100)">--</button>
+                    <button class="step-btn" onclick="changeVal('rangeStart', -1)">-</button>
+                    <div id="disp_rangeStart" class="val-display">1</div>
+                    <button class="step-btn" onclick="changeVal('rangeStart', 1)">+</button>
+                    <button class="step-btn" onclick="changeVal('rangeStart', 100)">++</button>
+                </div>
+            </div>
+            <div class="param-row">
+                <span class="param-title">終了番号</span>
+                <div class="ctrl-btns">
+                    <button class="step-btn" onclick="changeVal('rangeEnd', -100)">--</button>
+                    <button class="step-btn" onclick="changeVal('rangeEnd', -1)">-</button>
+                    <div id="disp_rangeEnd" class="val-display">1462</div>
+                    <button class="step-btn" onclick="changeVal('rangeEnd', 1)">+</button>
+                    <button class="step-btn" onclick="changeVal('rangeEnd', 100)">++</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="label">速度・時間管理 (秒)</div>
+        <div class="param-group">
+            <div class="param-row">
+                <span class="param-title">読み上げ速度</span>
+                <div class="ctrl-btns">
+                    <button class="step-btn" onclick="changeVal('speechRate', -0.1)">-</button>
+                    <div id="disp_speechRate" class="val-display">1.6</div>
+                    <button class="step-btn" onclick="changeVal('speechRate', 0.1)">+</button>
+                </div>
+            </div>
+            <div class="param-row">
+                <span class="param-title">英語表示時間</span>
+                <div class="ctrl-btns">
+                    <button class="step-btn" onclick="changeVal('engTime', -0.1)">-</button>
+                    <div id="disp_engTime" class="val-display">1.0</div>
+                    <button class="step-btn" onclick="changeVal('engTime', 0.1)">+</button>
+                </div>
+            </div>
+            <div class="param-row">
+                <span class="param-title">解答制限時間</span>
+                <div class="ctrl-btns">
+                    <button class="step-btn" onclick="changeVal('japTime', -0.1)">-</button>
+                    <div id="disp_japTime" class="val-display">1.0</div>
+                    <button class="step-btn" onclick="changeVal('japTime', 0.1)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="label">クイックセクション</div>
+        <div id="sectionContainer" class="section-grid"></div>
+
+        <button id="startBtn" class="main-btn" onclick="initTraining()">修行開始</button>
+    </div>
+</div>
+
+<div id="app">
+    <div id="infoText" style="text-align:center; font-weight:bold; margin-bottom:10px; color:var(--gray);"></div>
+    <div class="progress-container"><div id="progressBar"></div></div>
+    
+    <div id="card">
+        <div id="englishWord"></div>
+        <div id="japaneseWord"></div>
+        <div id="gaugeContainer"><div id="gauge"></div></div>
+    </div>
+
+    <div class="ans-btns">
+        <button id="wrongBtn" class="ans-btn" onclick="processAnswer(false)">苦手 (A)</button>
+        <button id="correctBtn" class="ans-btn" onclick="processAnswer(true)">わかる (Z)</button>
+    </div>
+</div>
+
+<div id="report">
+    <div class="container" style="text-align:center;">
+        <h1>修行完了</h1>
+        <div id="resultScore" style="font-size:24px; font-weight:900; margin:20px 0; color:var(--success);"></div>
+        <textarea id="missedArea" readonly></textarea>
+        <button class="main-btn" onclick="location.reload()">トップに戻る</button>
+    </div>
+</div>
+
+<script>
+const FULL_DATA = `Let's try anyway,とにかくやってみよう1
+We are ready to ship your order,ご注文の商品を発送する準備ができています2
+attend a workshop,研修会に参加する3
+The event was successful,そのイベントは成功だった4
+a new employee at Tex Corporation,テックス社の新入社員5
+Our business is expanding,私たちの事業は拡大している6
+one free copy of the book,その本の無料の1冊7
+The hotel is close to the airport,そのホテルは空港に近い8
+a weekly magazine,週刊誌9
+I prefer to work part-time,私はパートタイムで働くほうがよい10
+Please sign in at the front desk,フロントで記帳してください11
+Let's take a break,休憩しましょう12
+an important document,重要書類13
+the third quarter,第3四半期14
+a department head,部門長15
+accept an offer,申し出を受け入れる16
+allow employees to use company vehicles,従業員に社用車の使用を認める17
+a connecting flight,乗り継ぎ便18
+Tex recently bought a printer,テックスは最近プリンターを買った19
+I'll be here for another two hours,あと2時間ここにいます20
+It is likely that Tex will succeed,テックスは成功しそうだ21
+at a rate of 20% a year,年間20パーセントの割合で22
+local businesses,地元企業23
+Tex retired after 20 years of service,テックスは20年勤めた後に退職した24
+relationships in the workplace,職場での人間関係25
+an employee's performance,従業員の勤務成績26
+a singer native to the town,その町出身の歌手27
+design a modern building,現代的な建物を設計する28
+Tex is fully satisfied with the result,テックスはその結果に完全に満足している29
+the author of a popular book,人気の本の著者30
+an experienced engineer,経験豊富な技術者31
+open a new branch,新しい支店を開く32
+develop a plan,計画を立てる33
+nearly two years,ほぼ2年間34
+create unique designs,独自のデザインを作る35
+receive a bill,請求書を受け取る36
+by express mail,速達便で37
+The total comes to 100 dollars,合計は100ドルになる38
+Let me introduce Mr Kato,加藤さんをご紹介します39
+We charge $50 for the service,そのサービスには50ドルかかります40
+high profit,高利益41
+in the field of art,芸術の分野で42
+affect the price,価格に影響する43
+sales figures,売上高44
+of all the works in the museum,美術館の全作品のうち45
+in original condition,元の状態で46
+There are no hotels in this neighborhood,この近所にはホテルがない47
+work environment,労働環境48
+consumer behavior,消費者行動49
+an art exhibition,美術展50
+meet in the cafeteria for lunch,昼食のために食堂で会う51
+consider working in Japan,日本で働くことを検討する52
+signs of improvement,改善の兆し53
+possibility of success,成功の可能性54
+be widely regarded as,広く～と見なされている55
+a lack of information,情報不足56
+Tickets are available online,チケットはオンラインで入手できる57
+Tex prevented us from entering the room,テックスは私たちがその部屋に入るのを妨げた58
+The team was praised by the CEO,そのチームはCEOに称賛された59
+an excellent service,すばらしいサービス60
+announce the winners,優勝者を発表する61
+a round-trip ticket to Hawaii,ハワイへの往復切符62
+a job opening,求人63
+The campaign resulted in success,そのキャンペーンは成功につながった64
+report to work before a shift begins,勤務が始まる前に出勤する65
+recover losses,損失を取り戻す66
+results of a study,研究結果67
+market research,市場調査68
+meet demand,需要を満たす69
+hire an assistant,助手を雇う70
+while touring the factory,工場見学中に71
+bus fare,バス運賃72
+necessary forms,必要書類73
+The deadline is approaching,締め切りが近づいている74
+Tex was aware of the problem,テックスはその問題に気づいていた75
+an increasingly important role,ますます重要になる役割76
+a former job,以前の仕事77
+the cause of the problem,その問題の原因78
+We are pleased with the final result,私たちは最終結果に満足している79
+Tex is responsible for training employees,テックスは従業員の研修を担当している80
+an appointment with a doctor,医者の予約81
+make travel arrangements,旅行の手配をする82
+full-time employees,常勤社員83
+absolutely free of charge,完全無料で84
+send a resume,履歴書を送る85
+Please note that,次の点にご注意ください86
+visit a client,取引先を訪問する87
+post changes on the bulletin board,変更事項を掲示板に掲示する88
+shop directly from a Web site,ウェブサイトから直接買い物する89
+blame Tex for the failure,失敗をテックスのせいにする90
+Tex is expected to arrive tomorrow,テックスは明日到着する予定だ91
+The program is usually broadcast on Saturdays,その番組はたいてい土曜日に放送される92
+returns policy,返品方針93
+Tex offered to work the night shift,テックスは夜勤を申し出た94
+forward an e-mail,メールを転送する95
+we firmly believe that,私たちは強くそう信じている96
+The catalog is divided into three sections,そのカタログは3つの部に分かれている97
+the table of contents,目次98
+a guided tour,案内付き見学99
+a degree in journalism,ジャーナリズムの学位100
+conveniently located near a subway station,地下鉄駅の近くに便利に位置している101
+receive a warm welcome,温かい歓迎を受ける102
+We are happy to inform you that,～をお知らせできてうれしく思います103
+Sales have doubled this year,売上は今年2倍になった104
+The town is crowded with tourists,その町は観光客で混雑している105
+be familiar with the industry,その業界に詳しい106
+earn the respect of people,人々の尊敬を得る107
+operate a machine safely,機械を安全に操作する108
+I prefer an aisle seat,通路側の席がいいです109
+as we mentioned before,前に述べたように110
+a way of attracting customers,顧客を引きつける方法111
+a highly successful business person,非常に成功した実業家112
+a serious problem,深刻な問題113
+main duties of a teacher,教師の主な職務114
+a commercial district,商業地区115
+a private tour,貸し切りツアー116
+a reasonable price,手ごろな価格117
+correct information,正確な情報118
+basic functions,基本機能119
+Few companies can match our quality service,当社ほど質の高いサービスを提供できる会社はほとんどない120
+fairly common,かなり一般的な121
+fuel costs,燃料費122
+book a room,部屋を予約する123
+the host of a television show,テレビ番組の司会者124
+hire additional staff,追加の職員を雇う125
+this year's budget,今年度予算126
+a travel agency,旅行代理店127
+a repair crew,修理班128
+labor cost,人件費129
+overseas markets,海外市場130
+prove to be difficult,難しいことがわかる131
+provide Tex with information,テックスに情報を提供する132
+the checkout counter,レジカウンター133
+safety standards,安全基準134
+practical experience,実務経験135
+ability to speak three languages,3か国語を話す能力136
+Thank you for your cooperation,ご協力ありがとうございます137
+Surprisingly, Tex passed the exam,驚いたことにテックスは試験に合格した138
+handling costs,取扱費139
+Employees are encouraged to attend the event,従業員はそのイベントに参加するよう勧められている140
+the production area,生産区域141
+deliver a presentation,プレゼンテーションを行う142
+the current employees,現在の従業員143
+the second round of interviews,2次面接144
+following the speech, we had dinner,スピーチの後で私たちは夕食を取った145
+office supply,事務用品146
+order some light bulbs,電球をいくつか注文する147
+The book is worth reading,その本は読む価値がある148
+a customer survey,顧客調査149
+stay at a nearby hotel,近くのホテルに泊まる150
+Tex lives in the suburbs of Tokyo,テックスは東京の郊外に住んでいる151
+preserve the environment,環境を保護する152
+a separate dining room,別の食堂153
+before signing a contract,契約に署名する前に154
+the person who has the most authority,最も権限のある人155
+the wage level,賃金水準156
+make advances in technology,技術を進歩させる157
+throughout the summer,夏の間ずっと158
+effective advertising campaigns,効果的な広告キャンペーン159
+on a typical Saturday night,典型的な土曜の夜に160
+a rapidly growing company,急成長している会社161
+professional background,職歴162
+slightly increased from 24 to 27 percent,24パーセントから27パーセントへわずかに増加した163
+travel expenses,旅費164
+found a company,会社を設立する165
+be eager to know,ぜひ知りたいと思う166
+products on display,展示中の商品167
+seek interns for the summer,夏季インターンを募集する168
+paid leave,有給休暇169
+I suspect that Tex is lying,テックスはうそをついていると思う170
+have no previous experience,これまでの経験がない171
+achieve a sales target,売上目標を達成する172
+a recently formed organization,最近結成された組織173
+particularly interested in history,特に歴史に興味がある174
+an essential part of the job,その仕事の不可欠な部分175
+museum exhibits,博物館の展示物176
+free shuttle service,無料送迎サービス177
+fill out an application,申込書に記入する178
+a valuable addition to the team,チームにとって価値ある戦力179
+Sales rose sharply,売上は急増した180
+health insurance,健康保険181
+identify problems,問題点を特定する182
+explore the possibility,可能性を探る183
+suitable for outdoor use,屋外使用に適している184
+under the regulation,その規則の下で185
+propose a budget,予算案を提案する186
+reschedule an appointment,予約を変更する187
+prepare for the upcoming event,近づいているイベントの準備をする188
+share a wealth of knowledge,豊富な知識を共有する189
+I have attached my resume,履歴書を添付しました190
+immediately solve the problem,すぐにその問題を解決する191
+I haven't seen Tex lately,最近テックスに会っていない192
+confirm a booking,予約を確認する193
+The room can fit 50 people,その部屋には50人入れる194
+negotiate with a client,顧客と交渉する195
+an ideal location,理想的な場所196
+distribute a document,書類を配布する197
+truly rare,本当に珍しい198
+formally announce,正式に発表する199
+Workers are required to wear uniforms,作業員は制服を着ることが義務づけられている200
+comfort and convenience,快適さと利便性201
+All flights have been delayed,すべての便が遅れている202
+a job description,職務記述書203
+The company is struggling to survive,その会社は生き残るために苦闘している204
+Tex was appointed chairperson of the committee,テックスは委員会の委員長に任命された205
+work mainly in the steel industry,主に鉄鋼業で働く206
+in alphabetical order,アルファベット順に207
+Please refer to the map,地図を参照してください208
+a series of lectures,一連の講義209
+both managers and tenants,管理者と借主の両方210
+analyze customer feedback,顧客の反応を分析する211
+I think it's a bargain,それはお買い得だと思う212
+ten locations, including Tokyo and Osaka,東京と大阪を含む10か所213
+carefully review the manual,マニュアルを注意深く確認する214
+equally important,同じくらい重要な215
+relationships with suppliers,供給業者との関係216
+employee benefits,従業員福利厚生217
+I'm writing in response to your letter,お手紙への返事を書いています218
+pay on a monthly basis,月払いで支払う219
+temporary workers,臨時労働者220
+traffic updates,交通情報221
+ease of use,使いやすさ222
+a workshop on business finance,企業財務に関する研修会223
+an exciting and memorable trip,わくわくして思い出に残る旅行224
+We regret to inform you that,残念ながらお知らせしなければなりません225
+advance notice,事前通知226
+The project is in progress,その計画は進行中である227
+I had an opportunity to see Tex,テックスに会う機会があった228
+at the time of purchase,購入時に229
+decline to respond,返答を断る230
+sufficient time,十分な時間231
+determine how to sell the product,その製品をどう売るか決める232
+participate in the seminar,セミナーに参加する233
+Mobile phones are gradually replacing computers,携帯電話は徐々にコンピューターに取って代わっている234
+establish a business,事業を始める235
+Please read all the instructions,すべての指示を読んでください236
+attention to detail,細部への注意237
+properly trained staff,適切に訓練された職員238
+Tex's attempt to become a singer,歌手になろうとするテックスの試み239
+a property manager,不動産管理者240
+the border between California and Arizona,カリフォルニア州とアリゾナ州の境界241
+influence the decision,決定に影響を与える242
+a strong presence in the area,その地域での強い存在感243
+Tex was seldom seen in public,テックスは人前でめったに見られなかった244
+aim to cut energy use,エネルギー使用量削減を目指す245
+somewhat more expensive than I expected,思っていたよりやや高い246
+teachers and students alike,教師も生徒も同様に247
+evidence of payment,支払いの証拠248
+the savings rate,貯蓄率249
+Tex represented the company at the event,テックスはそのイベントで会社を代表した250
+the entire staff,全職員251
+a popular architect,人気のある建築家252
+publish a magazine,雑誌を発行する253
+a scientific journal,学術雑誌254
+imports from China,中国からの輸入品255
+a Seattle-based firm,シアトルに拠点を置く会社256
+the packaging area,梱包区域257
+a wide range of services,幅広いサービス258
+What is implied about the hotel?,そのホテルについて何がほのめかされているか259
+What can be inferred from the letter?,その手紙から何が推測できるか260
+What is stated about the hotel?,そのホテルについて何が述べられているか261
+Who is the intended audience?,想定される対象読者は誰か262
+a commuter train,通勤列車263
+an empty warehouse,空の倉庫264
+a car manufacturer,自動車メーカー265
+We are delighted to see you,お会いできてうれしいです266
+the method of payment,支払い方法267
+certainly different from the traditional styles,確かに伝統的な様式とは異なる268
+efficient use of energy,エネルギーの効率的利用269
+avoid wasting time,時間を無駄にしない270
+bank balance,預金残高271
+Can I exchange this for a larger size?,これをもっと大きいサイズに交換できますか272
+the search for the next president,次期社長探し273
+a specific example,具体例274
+the grand opening celebration,盛大な開店記念式典275
+celebrate the twentieth anniversary,20周年を祝う276
+a rent increase,家賃の値上げ277
+Tex won; therefore, he is happy,テックスは勝った。したがって彼はうれしい278
+Tex is poor; nevertheless, he is happy,テックスは貧しい。それにもかかわらず彼は幸せだ279
+The book is accompanied by a CD,その本にはCDが付いている280
+Complaints about the noise,騒音についての苦情281
+maintain a Web site,ウェブサイトを維持する282
+express concern,懸念を表明する283
+Our products are recognized for their quality,当社の製品は品質の高さで認められている284
+various designs and patterns,さまざまなデザインと模様285
+Thank you for your assistance,ご支援ありがとうございます286
+Tex transferred to Mexico City,テックスはメキシコシティに転勤した287
+process an order,注文を処理する288
+approve a plan,計画を承認する289
+make suggestions,提案をする290
+committee members,委員会のメンバー291
+a negative impact,悪影響292
+Please direct any questions to Tex,質問はすべてテックスへお願いします293
+write a memorandum,覚書を書く294
+50% of the workforce,労働力の50パーセント295
+the time of arrival,到着時刻296
+Tex was rewarded with a bonus,テックスは賞与を与えられた297
+store food in a refrigerator,食べ物を冷蔵庫に保存する298
+a casual reader,気軽な読者299
+a complex system,複雑な仕組み300
+The city boasts two famous museums,その市は2つの有名な美術館を誇っている301
+loyal customers,忠実な顧客302
+a large-scale project,大規模な計画303
+the permanent collection,常設展示304
+a common practice,一般的な慣行305
+make a flyer,チラシを作る306
+read the minutes,議事録を読む307
+We apologize for the inconvenience,ご不便をおかけして申し訳ありません308
+hold a drawing,抽選会を開く309
+Tex Kato stars in the film,加藤テックスがその映画に主演している310
+stress the importance of reading,読書の大切さを強調する311
+a hotel in a beautiful setting,美しい環境にあるホテル312
+domestic market,国内市場313
+make a debut,デビューする314
+a medical device,医療機器315
+high income,高収入316
+a research facility,研究施設317
+a research institution,研究機関318
+work closely with Tex,テックスと緊密に仕事をする319
+reduce the workload,仕事量を減らす320
+a special occasion,特別な機会321
+consumer trends,消費動向322
+disappointing sales,期待外れの売上323
+pay a $10 fine,10ドルの罰金を払う324
+endangered animals,絶滅危惧動物325
+A Q&A session,質疑応答の時間326
+Tex is capable of doing the job,テックスにはその仕事をする能力がある327
+exceed expectations,期待を上回る328
+The event will conclude with a concert,そのイベントはコンサートで締めくくられる329
+use caution,注意する330
+The machine will automatically shut down,その機械は自動的に停止する331
+The meeting will begin shortly,会議はまもなく始まる332
+guarantee same day delivery,当日配達を保証する333
+put stronger emphasis on,より強く重点を置く334
+remind employees about the policy,従業員にその方針を思い出させる335
+a letter of recommendation,推薦状336
+Tex is willing to work overseas,テックスは海外勤務をいとわない337
+awards ceremony,授賞式338
+a high concentration of restaurants,飲食店の密集339
+without permission,許可なく340
+a family-owned firm,同族経営の会社341
+The scholarship enabled Tex to study abroad,その奨学金のおかげでテックスは留学できた342
+checked luggage,預け荷物343
+Please fasten your seat belts,シートベルトをお締めください344
+Can I borrow your stapler?,ホッチキスをお借りできますか345
+submit a report,報告書を提出する346
+obtain an official license,正式な免許を取得する347
+release the sales figures,売上高を発表する348
+readily available,容易に入手できる349
+frequent bus service,本数の多いバス運行350
+the produce section of a supermarket,スーパーの青果売り場351
+a regularly updated list,定期的に更新される一覧352
+despite the snow,雪にもかかわらず353
+display merchandise,商品を陳列する354
+the company guidelines,会社の指針355
+an annual report,年次報告書356
+a leading expert,第一人者357
+proceed to the boarding gate,搭乗口へ進む358
+postpone a meeting,会議を延期する359
+the data indicates that,そのデータは～を示している360
+each individual in the company,その会社の一人ひとり361
+the initial plan,当初の計画362
+Admission is free for all members,会員は全員入場無料です363
+talk with a colleague,同僚と話す364
+secure access to the information,その情報への安全なアクセスを確保する365
+for a limited time,期間限定で366
+flight delays and cancellations,便の遅延と欠航367
+compete with large companies,大企業と競争する368
+any questions concerning the order,その注文に関する質問369
+reject a proposal,提案を拒否する370
+a heavily used bus route,利用の多いバス路線371
+have the potential,可能性を持っている372
+an estimate for the project,その計画の見積もり373
+an in-house designer,社内デザイナー374
+Tex was unable to locate the book,テックスはその本を見つけられなかった375
+find a solution,解決策を見つける376
+production capacity,生産能力377
+Tex can barely understand English,テックスは英語がほとんど理解できない378
+the scheduled departure date,予定出発日379
+a brief report,簡潔な報告書380
+a three-year warranty,3年間保証381
+a cost comparison,費用比較382
+contribute to a team,チームに貢献する383
+a high priority,優先度が高いこと384
+The committee consists of five members,その委員会は5人の委員で構成されている385
+Call me at extension 4649.,内線4649に電話してください386
+Thank you for your hospitality,ご親切なおもてなしをありがとうございます387
+due to mechanical trouble,機械の故障のため388
+The book contains useful information,その本には有益な情報が含まれている389
+an editor at a newspaper,新聞社の編集者390
+Tex is not athletic,テックスは運動が得意ではない391
+the mayor of Text Town,テキストタウン市長392
+We were impressed by his knowledge,私たちは彼の知識に感銘を受けた393
+name, address, and occupation,氏名、住所、職業394
+existing customers,既存顧客395
+Applicants must be fluent in Mandarin,応募者は中国語を流暢に話せなければならない396
+permission from a supervisor,上司の許可397
+focus on overseas markets,海外市場に焦点を当てる398
+outstanding balance,未払い残高399
+a large conference room,大きな会議室400
+a natural consequence,自然な結果401
+a sealed container,密封容器402
+Tex was not involved with the project,テックスはその計画に関わっていなかった403
+an urgent request,緊急の依頼404
+a flight to Seattle via Denver,デンバー経由シアトル行きの便405
+when entering the laboratory,研究室に入るとき406
+a previous engagement,先約407
+proudly announce,誇らしく発表する408
+the launch of a new product,新製品の発売409
+a significant increase in profits,利益の大幅な増加410
+reduce costs by a substantial amount,かなりの額だけ費用を削減する411
+the overall budget,全体予算412
+We are committed to providing quality service,私たちは質の高いサービス提供に尽力している413
+Altogether, 300 people came to the party.,全部で300人がそのパーティーに来た414
+household products,家庭用品415
+alter the schedule,予定を変更する416
+assure Tex that,テックスに～だと保証する417
+be directly exposed to the sun,直射日光にさらされる418
+the opening remarks,開会のあいさつ419
+The company is pursuing a new market,その会社は新市場を追求している420
+over the past two decades,過去20年間にわたって421
+Please do not hesitate to contact us,どうぞ遠慮なくご連絡ください422
+a more profitable market,より利益の出る市場423
+make adjustments to the plan,計画を調整する424
+electronic components,電子部品425
+adopt a plan,計画を採用する426
+an alternative date,別の日程427
+a mutual interest,共通の関心428
+a normal procedure,通常の手順429
+at regular intervals,一定の間隔で430
+artists and craft people,芸術家や工芸家431
+a convention venue,会議会場432
+a sales representative,営業担当者433
+by public transportation,公共交通機関で434
+invest in a new plant,新工場に投資する435
+affordably priced items,手ごろな価格の商品436
+research findings,研究成果437
+timely announcement,時宜を得た発表438
+the most promising applicant,最も有望な応募者439
+travel tips about packing,荷造りに関する旅行のこつ440
+a stable supply of electricity,安定した電力供給441
+a steep drop in sales,売上の急落442
+We are confident that,私たちは確信している443
+We are convinced that,私たちはそうだと信じ切っている444
+retain a receipt,レシートを保管しておく445
+Please find enclosed my resume,履歴書を同封いたします446
+acquire a company,会社を買収する447
+experience in a related field,関連分野での経験448
+I definitely need the item,私はぜひその品物が必要だ449
+an excerpt from a speech,スピーチの抜粋450
+distinguish between cause and effect,原因と結果を区別する451
+a relatively recent trend,比較的最近の傾向452
+thorough review,徹底的な見直し453
+take measurements of a table,テーブルの寸法を測る454
+under any circumstance,いかなる場合でも455
+overcome the difficulties,困難を乗り越える456
+an immense amount of money,莫大なお金457
+file a claim,請求を申し立てる458
+a panel of experts,専門家委員会459
+the bottom portion of the ticket,チケットの下部460
+all company personnel,全社の職員461
+Telephone service was restored this morning,電話サービスは今朝復旧した462
+conduct a survey,調査を実施する463
+assume responsibility,責任を負う464
+produce dependable cars and trucks,信頼できる自動車やトラックを生産する465
+accurate sales figures,正確な売上高466
+I really appreciate your help,本当に助かります467
+primary duties,主な職務468
+Teaching experience is desirable,教育経験があることが望ましい469
+deposit and balance,頭金と残額470
+the completion of the project,その計画の完了471
+appropriate clothes for a job interview,就職面接に適した服装472
+a challenging task,やりがいのある難しい仕事473
+various factors,さまざまな要因474
+local residents,地域住民475
+proof of purchase,購入証明476
+vote against a proposal,提案に反対票を投じる477
+a rental agreement,賃貸契約478
+check extremely carefully,非常に注意深く確認する479
+Michael's personal physician,マイケルの主治医480
+track an order,注文を追跡する481
+shipment status,発送状況482
+locally grown crops,地元産の作物483
+a landscaping company,造園会社484
+severe damage,深刻な被害485
+a luxury sedan,高級セダン486
+daily output of a factory,工場の日産量487
+a remote mountain village,人里離れた山村488
+The problem was resolved,その問題は解決された489
+the new employee orientation,新入社員研修490
+a packet of materials,一式の資料491
+a spacious room,広々とした部屋492
+a modest increase in price,価格の小幅な上昇493
+impose a fee on customers,顧客に料金を課す494
+a minimum of ten years,少なくとも10年495
+a heated debate,白熱した議論496
+a regular checkup,定期健診497
+the reverse side,裏面498
+organize an event,イベントを企画する499
+find a replacement for Tex,テックスの代わりを見つける500
+for no apparent reason,はっきりした理由もなく501
+reduce inventory,在庫を減らす502
+a newly renovated library,新しく改装された図書館503
+contact a reference,照会先に連絡する504
+consistently rank among the top 10 universities,常に上位10大学に入る505
+the highly anticipated new book,大いに期待されている新刊506
+a strong commitment to quality,品質への強い取り組み507
+retail stores,小売店508
+improve productivity,生産性を向上させる509
+Tex has been assigned the work,テックスはその仕事を割り当てられた510
+renew a contract,契約を更新する511
+a successful candidate,採用された候補者512
+the original quote,元の見積もり513
+reply swiftly,すばやく返答する514
+find even the smallest defects,ごく小さな欠陥さえ見つける515
+an economical printer,経済的なプリンター516
+escort visitors to their destinations,来客を目的地まで案内する517
+illustrate the point,その点を説明する518
+a dominant position in the market,市場での支配的地位519
+The meeting starts promptly at 1 P.M.,会議は午後1時ちょうどに始まる520
+outdated TOEIC books,古くなったTOEIC本521
+The weather in Auckland is quite agreeable,オークランドの天気はとても快適だ522
+Tex occasionally travels abroad.,テックスは時々海外に行く523
+inspect a building,建物を点検する524
+a marketing strategy,販売戦略525
+wear protective clothing,防護服を着る526
+resume operations,業務を再開する527
+A new security system was implemented,新しい警備システムが導入された528
+the transition from student to professional,学生から社会人への移行529
+transform a supply room into an office,備品室を事務所に変える530
+assemble the materials,資料を集める531
+alert Tex to the problem,テックスにその問題を知らせる532
+performance evaluation,業績評価533
+an option to change the date,日付を変更する選択肢534
+I have eaten at numerous local restaurants.,私は地元の多くのレストランで食事をしたことがある535
+accomplished designer,熟練した設計者536
+deserve a promotion,昇進に値する537
+a dress patterned with flowers,花柄のワンピース538
+Street parking is prohibited in this area.,この地域では路上駐車が禁止されている539
+provide relief to people,人々に救済を与える540
+the company's mission,会社の使命541
+restrict employees from accessing the Internet,従業員がインターネットにアクセスするのを制限する542
+The weather is cold, so dress accordingly,寒いのでそれに応じた服装をしなさい543
+a pension plan,年金制度544
+some experts predict that,一部の専門家は～と予測している545
+Tex was eventually promoted to CEO.,テックスはついにCEOに昇進した546
+an innovative technology,革新的な技術547
+the scene of the investigation,捜査現場548
+reserve the right to cancel an order,注文を取り消す権利を留保する549
+three district features,3つの主な特徴550
+register for employee training,従業員研修に登録する551
+The facility houses six laboratories.,その施設には6つの研究室がある552
+resign without notice,予告なしに辞職する553
+delicate negotiations,微妙な交渉554
+honor an employee,従業員を表彰する555
+a six-piece assortment,6個入りの詰め合わせ556
+substitute butter for vegetable oil,植物油の代わりにバターを使う557
+relocate an office,事務所を移転する558
+Tex was reluctant to talk about it.,テックスはそれについて話したがらなかった559
+dispose of garbage,ごみを処分する560
+work independently and as a team member,単独でもチームの一員としても働く561
+The problems all stem from Tex.,その問題はすべてテックスに起因する562
+convert a warehouse into an office,倉庫を事務所に変える563
+urge Tex to change his mind,テックスに考えを変えるよう強く勧める564
+enlarge a house,家を拡張する565
+It is doubtful that Tex will succeed,テックスが成功するかは疑わしい566
+The machine is still functional,その機械はまだ動く567
+fulfill a requirement,要件を満たす568
+approximately two hours,約2時間569
+corporate headquarters in New York,ニューヨークにある本社570
+form an alliance,同盟を結ぶ571
+routine maintenance work,定期保守作業572
+undertake a study,研究に着手する573
+highly knowledgeable about investments,投資に非常に詳しい574
+The company specializes in Web design.,その会社はウェブデザインを専門としている575
+the first phase,第1段階576
+a construction permit,建築許可577
+a regional sales meeting,地域営業会議578
+My driver's license expires in April.,私の運転免許証は4月に切れる579
+the sales outlook,売上見通し580
+generous contributions to a charity,慈善団体への多額の寄付581
+Each room is equipped with Internet access.,各部屋にはインターネット接続設備がある582
+install a new printer,新しいプリンターを設置するDocument583
+ask for a prescription,処方箋を求める584
+recipients of the prize,受賞者585
+the new recruits,新入社員586
+The price includes flights and accommodations,その料金には航空券と宿泊費が含まれる587
+obtain a grant,助成金を得る588
+seat and meal preferences,座席と食事の希望589
+Sales have been increasing steadily,売上は着実に増えている590
+suspend production,生産を停止する591
+consult a doctor,医師に相談する592
+ensure that the products are safe,製品が安全であることを確実にする593
+tourism industry,観光産業594
+without the written consent,書面による同意なしに595
+Make sure you have all your belongings,持ち物をすべて持っていることを確認してください596
+a local grocery store,地元の食料品店597
+receive a paycheck,給料を受け取る598
+flexible work hours,柔軟な勤務時間599
+the former and the latter,前者と後者600
+modify a contract,契約を修正する601
+operate in multiple countries,複数の国で事業を行う602
+profile a businessperson,実業家を紹介する603
+rapidly and precisely,迅速かつ正確に604
+Tex was exhausted.,テックスは疲れ切っていた605
+a timeline of events,出来事の時系列606
+a six-digit code,6桁のコード607
+reimburse travel expenses,旅費を払い戻す608
+reach a compromise,妥協点に達する609
+the objective of the survey,その調査の目的610
+check the Web site periodically,そのウェブサイトを定期的に確認する611
+extensive analysis,広範な分析612
+a combined effort,共同の努力613
+Tex repeatedly called the number.,テックスは何度もその番号に電話した614
+We are dedicated to providing quality service.,私たちは質の高いサービスの提供に尽力している615
+an adequate explanation,十分な説明616
+use fresh ingredients,新鮮な材料を使う617
+open an outlet in Japan,日本に店舗を開く618
+Sales have increased considerably.,売上はかなり増えた619
+Tex is qualified for the position.,テックスはその職に必要な資格がある620
+acknowledge receipt of the order,注文を受領したことを知らせる621
+a reliable secretary,信頼できる秘書622
+a well-deserved reputation,当然の評価623
+prepare an agenda beforehand,事前に議題を準備する624
+valid until the end of May,5月末まで有効な625
+an inspiring speech,感動的なスピーチ626
+work a lot of overtime,たくさん残業する627
+an authorized dealer,正規販売店628
+easily accessible by train,電車で簡単に行ける629
+give a superb presentation,すばらしい発表をする630
+donations to the museum,博物館への寄付631
+revise a plan,計画を見直す632
+Refreshments will be served.,軽食が出されます633
+Whereas sales increased, profits dropped.,売上は増えた一方で利益は下がった634
+the regulations clearly specify that,その規則は～と明確に定めている635
+countless times,数え切れないほど何度も636
+media coverage,報道637
+Tex is looking forward to the banquet.,テックスは宴会を楽しみにしている638
+dependence on imported oil,輸入石油への依存639
+The system worked exceptionally well.,そのシステムは非常によく機能した640
+The rent includes all utilities.,家賃にはすべての光熱費が含まれる641
+Thank you for your inquiry.,お問い合わせありがとうございます642
+unfavorable market conditions,不利な市場状況643
+be comparable in size to Tokyo Dome,東京ドームと同程度の大きさである644
+wasteful spending,無駄な支出645
+a blueprint for the new theater,新しい劇場の設計図646
+an administrative assistant,事務補助員647
+a storage facility,保管施設648
+a copy of the certificate,証明書の写し649
+the remainder of the budget,予算の残り650
+a bank transaction,銀行取引651
+This is Tex Kato from Tex Pharmacy.,テックス薬局の加藤テックスです652
+boost the company's profit,会社の利益を押し上げる653
+the staff was courteous,職員は礼儀正しかった654
+generate profits,利益を生み出す655
+pay tuition fees,授業料を払う656
+the most recent statistics,最新の統計657
+fill out a questionnaire,アンケートに記入する658
+subscribe to a magazine,雑誌を定期購読する659
+summary,要約660
+The pipe under the sink is leaking.,流しの下のパイプが漏れている661
+the assessment of the value,価値の評価662
+a motivated individual,やる気のある人663
+diverse group of experts,多様な専門家集団664
+a full refund,全額返金665
+monitor inventory levels,在庫水準を監視する666
+publicize a book,本を宣伝する667
+be eligible to receive paid holidays,有給休暇を受ける資格がある668
+a complimentary breakfast,無料の朝食669
+damage in transit,輸送中の損傷670
+kitchen appliances,台所用電化製品671
+Please refrain from using mobile phones.,携帯電話の使用はお控えください672
+a product brochure,製品案内パンフレット673
+an informative seminar,ためになるセミナー674
+Add salt to enhance the flavor.,風味を高めるために塩を加えなさい675
+prior to the meeting,会議の前に676
+a two-year lease,2年間の賃貸契約677
+give an overview,概要を説明する678
+clarify the situation,状況を明らかにする679
+The report was clear and concise.,その報告書は明確で簡潔だった680
+We are really understaffed.,私たちは本当に人手不足だ681
+an embarrassing failure,恥ずかしい失敗682
+send an itinerary,旅程表を送る683
+in a calm manner,落ち着いた態度で684
+make upgrades to the air conditioning system,空調設備を改良する685
+mergers and acquisitions,合併と買収686
+notify employees of the change,従業員にその変更を知らせる687
+the tentative schedule,仮の予定688
+a beverage manufacturer,飲料メーカー689
+be compensated for damage,損害に対して補償される690
+shareholders' meeting,株主総会691
+a certified building inspector,認定建築検査員692
+work in collaboration with others,他者と協力して働く693
+specifications for the project,その計画の仕様694
+confidential materials,機密資料695
+the fund-raising dinner,資金集めの夕食会696
+garment manufacturers,衣料品メーカー697
+Tex attributes his success to luck.,テックスは自分の成功を運のおかげだと考えている698
+a vacant unit in an apartment building,マンションの空室699
+She will reportedly play the lead role.,彼女が主役を演じると伝えられている700
+state-of-the-art equipment,最先端設備701
+Good communication is vital in the workplace.,職場では良好な意思疎通が非常に重要だ702
+revitalize a community,地域社会を活性化する703
+personalize a product,製品を個別仕様にする704
+a masterpiece of European painting,ヨーロッパ絵画の傑作705
+Please include your portfolio.,作品集を同封してください706
+a travel voucher,旅行引換券707
+a renowned architect,著名な建築家708
+French cuisine,フランス料理709
+Photographs capture memorable moments in life.,写真は人生の思い出深い瞬間をとらえる710
+encounter a serious problem,深刻な問題に直面する711
+prominently displayed in a magazine,雑誌で目立つように掲載されている712
+undergo training,研修を受ける713
+Situated downtown, the hotel is convenient.,都心にあるのでそのホテルは便利だ714
+show moderate interest,ほどほどの関心を示す715
+because of a scheduling conflict,予定の重複のため716
+friends and acquaintances,友人や知人717
+positive reviews from critics,批評家からの好意的な評価718
+I'm thrilled to see you.,お会いできてとてもうれしいです719
+abundant opportunities for career advancement,昇進の機会が豊富にあること720
+Fat-free dairy products,無脂肪乳製品721
+experience at a managerial level,管理職レベルでの経験722
+We appreciate your patronage.,ご愛顧に感謝いたします723
+a last-minute change,直前の変更724
+available exclusively to our members,会員だけが利用できる725
+a useful perspective on the topic,その話題についての有益な見方726
+safety measures,安全対策727
+on the premises,敷地内で728
+a faculty member at Tex College,テックス大学の教員729
+advertising revenue,広告収入730
+initiate a negotiation,交渉を開始する731
+compile a list of participants,参加者名簿を作成する732
+the report was commissioned by Tex Corporation.,その報告書はテックス社の依頼で作成された733
+the biography of Steve Jobs,スティーブ・ジョブズの伝記734
+edit a manuscript,原稿を編集する735
+the vast majority of people in Japan,日本の人々の大多数736
+overcome an obstacle,障害を乗り越える737
+a circulation desk,貸出カウンター738
+detect an error,誤りを見つける739
+be solely responsible for the decision,その決定に単独で責任を負う740
+strikingly different,著しく異なる741
+weigh an offer,申し出を慎重に検討する742
+the trains originate from Tokyo Station.,その列車は東京駅を始発とする743
+within the confines of the law,法律の範囲内で744
+have no obligation to do,～する義務がない745
+fierce competition,激しい競争746
+the event coincides with Tex's birthday.,その行事はテックスの誕生日と重なる747
+Tex was instrumental in the project.,テックスはその計画に大きく貢献した748
+be proficient in English,英語に堪能である749
+speculation from industry experts,業界専門家による推測750
+topics relevant to the work,その仕事に関連する話題751
+only a fraction of the original price,元の価格のほんの一部752
+subtle differences,微妙な違い753
+Tex is overwhelmed with paperwork.,テックスは書類仕事に追われている754
+a prosperous town,繁栄している町755
+a growth initiative,成長戦略756
+Innovation is crucial for business success.,革新は事業成功にとって極めて重要だ757
+The community enthusiastically supports the event.,地域社会はその行事を熱心に支持している758
+a sequence of events,一連の出来事759
+a shopping excursion,買い物の外出760
+picturesque village,絵のように美しい村761
+an antique timepiece,古い時計762
+preliminary results from a survey,調査の予備結果763
+execute a plan,計画を実行する764
+a matter of the utmost importance,最重要事項765
+Construction will commence in September.,建設は9月に始まる766
+the scope of the study,その研究の範囲767
+British shoppers and their American counterparts.,イギリスの買い物客とそのアメリカの対応者768
+apply for a patent,特許を申請する769
+shop online, thus avoiding the long lines,オンラインで買い物をして長い列を避ける770
+affordable yet durable,手ごろでしかも丈夫な771
+expertise in computer programming,コンピュータープログラミングの専門知識772
+a comprehensive list of products,製品の包括的な一覧773
+the subsequent day,翌日774
+inclement weather,悪天候775
+excellent credentials as a scientist,科学者としての優れた資格776
+Tex voluntarily left the company.,テックスは自発的に会社を辞めた777
+We will not be liable for any damage.,当社はいかなる損害についても責任を負いません778
+The dessert complements the main dish.,そのデザートは主菜によく合う779
+energy conservation,省エネルギー780
+delegate authority to subordinates,部下に権限を委譲する781
+make a bid,入札する782
+talk informally with the general manager,総支配人と気軽に話す783
+unanimous approval,満場一致の承認784
+prospective customers,見込み客785
+a letter to commend an employee,従業員をほめる手紙786
+a remedy for slow sales,売上不振への対策787
+a special detergent,特別な洗剤788
+withstand high temperatures,高温に耐える789
+give a persuasive speech,説得力のある演説をする790
+in the previous correspondence,前回の書簡の中で791
+intentionally delay payments,意図的に支払いを遅らせる792
+enforce a new policy,新しい方針を実施する793
+in the overhead compartment,頭上の収納棚に794
+strive to cut costs,費用削減に努める795
+speak eloquently,雄弁に話す796
+a notable feature,注目すべき特徴797
+different from the predecessor,前任者とは異なる798
+hourly workers,時給労働者799
+the kitchen is outfitted with new appliances.,その台所には新しい機器が備え付けられている800
+a good indicator of success,成功のよい指標801
+a security lapse,安全管理上の手落ち802
+as a token of our appreciation for,～への感謝のしるしとして803
+a subsidiary of a Japanese company,日本企業の子会社804
+call a plumber,配管工を呼ぶ805
+The company has an on-site childcare center.,その会社には事業所内保育所がある806
+hundreds of submissions from the readers,読者からの何百もの投稿807
+The tower is the town's landmark.,その塔は町の名所だ808
+a wildlife photographer,野生動物写真家809
+an apprentice technician,見習い技術者810
+one of Tokyo's premier restaurants,東京有数のレストランの一つ811
+a three-day intensive training seminar,3日間の集中研修セミナー812
+make amendments to the contract,契約を修正する813
+Tex and Masaya, 16 and 18, respectively,テックスとマサヤはそれぞれ16歳と18歳だ814
+check fabric samples,布地の見本を確認する815
+catering service,配膳サービス816
+a fully furnished room,家具付きの部屋817
+publish a periodical,定期刊行物を発行する818
+Everything arrived intact.,すべて無事に届いた819
+for the duration of the event,その行事の期間中820
+receive a medical diagnosis,診断を受ける821
+surpass last year's sales,昨年の売上を上回る822
+a construction contractor,建設請負業者823
+staff turnover,職員の離職824
+The rule is applicable to all employees.,その規則は全従業員に適用される825
+the municipal government,市役所826
+an inactive lifestyle,活動量の少ない生活827
+tailor services to clients' needs,顧客の要望に合わせてサービスを調整する828
+clerical duties,事務職の業務829
+due to time constraints,時間的制約のため830
+a prestigious title,名誉ある肩書831
+a young entrepreneur,若い起業家832
+adverse health effects,健康への悪影響833
+a designated parking area,指定駐車区域834
+an advocate for energy efficiency,省エネ推進者835
+justification for the extra fee,追加料金の正当な理由836
+authentic works of art,本物の美術作品837
+a major reorganization,大規模な組織再編838
+a discontinued appliance,製造中止になった機器839
+cautiously optimistic about,～について慎重ながら楽観的である840
+as a precaution,念のため841
+The proceeds will go to charity.,収益は慈善団体に寄付される842
+interact with colleagues,同僚と交流する843
+an array of books,多くの本844
+fragile items,壊れやすい品物845
+persistence in job search,就職活動における粘り強さ846
+Please disregard my previous e-mail.,前のメールは無視してください847
+Colorful illustrations are integrated with the text.,色彩豊かな挿絵が本文に組み込まれている848
+an automated message,自動メッセージ849
+enroll in an aerobics class,エアロビクスの授業に申し込む850
+a machine malfunction,機械の故障851
+an ongoing project,進行中の計画852
+a cold medication,風邪薬853
+amenities such as gyms and swimming pools,ジムやプールなどの設備854
+in observance of the national holiday,祝日のため855
+a sales quota,販売ノルマ856
+interpersonal skills,対人関係能力857
+This product is endorsed by celebrities.,この製品は有名人に支持されている858
+an anonymous donor,匿名の寄付者859
+allocate sufficient budget for a project,計画に十分な予算を配分する860
+lower costs and correspondingly,費用を下げそれに応じて861
+state emphatically that,強調して～と述べる862
+a nationally syndicated radio program,全国ネットのラジオ番組863
+an abridged version,要約版864
+the company directory,会社の名簿865
+facilitate a discussion,議論を円滑に進める866
+the occupancy rate of hotels,ホテルの稼働率867
+pay a premium for organic vegetables,有機野菜に割増料金を払う868
+The advertisement was misleading.,その広告は誤解を招くものだった869
+family outings,家族での外出870
+the copyright law,著作権法871
+a turnaround plan,立て直し計画872
+verify the test results,検査結果を確認する873
+a lengthy process,長い過程874
+the table looks sturdy.,そのテーブルは頑丈そうに見える875
+reducing costs, thereby improving profitability,費用を削減しそれによって収益性を改善する876
+supplementary charts and graphs,補足の図表877
+affordable and nutritious dishes,手ごろで栄養のある料理878
+solicit donations,寄付を募る879
+The parking lot was too congested.,駐車場は混みすぎていた880
+during the intermission,休憩時間中に881
+It is pointless to discuss the matter.,その件を議論しても無意味だ882
+oversee a department,部門を監督する883
+take the scenic route,景色のよい道を通る884
+become obsolete,時代遅れになる885
+unveil a new product,新製品を発表する886
+service interruption,サービス中断887
+a rigorous testing process,厳格な試験工程888
+sustainable energy,持続可能なエネルギー889
+It's an oversight on our part.,それはこちらの見落としです890
+The event is customarily held in April.,その行事は慣例として4月に開かれる891
+incur a fine,罰金を科される892
+a duplicate key,合鍵893
+terminate a contract,契約を打ち切る894
+gain momentum,勢いを増す895
+dilute the paint with water,絵の具を水で薄める896
+an affluent neighborhood,裕福な地域897
+retrieve the data,データを取り出す898
+Members are exempt from the fee.,会員はその料金を免除される899
+stringent quality standards,厳しい品質基準900
+adhere to the rules,規則を守る901
+conform to international standards,国際基準に従う902
+comply with the regulations,規則を順守する903
+in accordance with the standards,基準に従って904
+consistent with the company policies,会社方針に一致して905
+in keeping with the company policy,会社方針に沿って906
+abide by the terms of a contract,契約条件を守る907
+a delegation of engineers from Japan,日本からの技術者代表団908
+The Internet is integral to our lives.,インターネットは私たちの生活に不可欠だ909
+Wood is vulnerable to moisture.,木材は湿気に弱い910
+at the discretion of the committee,委員会の裁量で911
+Road conditions will deteriorate.,道路状況は悪化するだろう912
+rising for an unprecedented eight months,前例のない8か月間上昇して913
+The company's stock price plummeted.,その会社の株価は急落した914
+a lucrative business,利益の大きい事業915
+a resourceful manager,機転の利く管理者916
+skeptical about the possibility,その可能性に懐疑的である917
+Using the Internet became the norm.,インターネットの利用が当たり前になった918
+embrace an idea,考えを受け入れる919
+an insightful article,洞察に富んだ記事920
+consolidate two divisions into one,2つの部門を1つに統合する921
+Passengers were left stranded at the airport.,乗客たちは空港に取り残された922
+refute a claim,主張に反論する923
+a liaison between management and employees,経営陣と従業員の連絡役924
+be contractually obligated,契約上の義務を負っている925
+Tex found the noise objectionable.,テックスはその騒音を不快だと感じた926
+itemize travel expenses,旅費を項目別に記載する927
+janitorial services,清掃業務928
+forge a relationship,関係を築く929
+for the third consecutive year,3年連続で930
+after long deliberation,長い熟慮の末に931
+the impending change in leadership,差し迫った指導部の交代932
+The position entails a lot of travel.,その職には多くの出張が伴う933
+a feasible plan,実行可能な計画934
+a critically acclaimed movie,批評家に高く評価された映画935
+a newlywed who lives in Philadelphia,フィラデルフィアに住む新婚の人936
+hire staff on a provisional basis,仮採用で職員を雇う937
+an unsolicited e-mail,迷惑メール938
+affiliation with other companies,他社との提携939
+It is imperative that we act now.,今すぐ行動することが不可欠だ940
+a versatile person,多才な人941
+repetitive work,単調な反復作業942
+avoid the use of jargon,専門用語の使用を避ける943
+an appraisal on a house,家の査定944
+a few minor shortcomings,いくつかの小さな欠点945
+strenuous efforts,懸命な努力946
+meticulously created artwork,細心の注意を払って作られた作品947
+proximity to the beach,海辺への近さ948
+I inadvertently sent an e-mail to Tex.,私はうっかりテックスにメールを送ってしまった949
+The medicine may cause drowsiness.,その薬は眠気を引き起こすかもしれない950
+the inaugural issue,創刊号951
+attend a mandatory meeting,出席必須の会議に出る952
+speak candidly,率直に話す953
+the turnout for the concert,そのコンサートの来場者数954
+diversify into new business areas,新しい事業分野へ多角化する955
+unbiased opinions,偏りのない意見956
+streamline the process,工程を効率化する957
+a volatile market situation,不安定な市場状況958
+a power outage,停電959
+an exquisite piece of jewelry,精巧な宝飾品960
+pay by monthly installments,月賦で支払う961
+demolish a building,建物を取り壊す962
+a discrepancy between the figures,数字の食い違い963
+Tex's career came to an abrupt end.,テックスの経歴は突然終わった964
+a definitive book on TOEIC vocabulary,TOEIC語彙についての決定版の本965
+an intriguing study,興味をそそる研究966
+unrivaled in quality,品質で比類がない967
+during his two-year tenure,彼の2年間の在任中に968
+revert to the old version,古い版に戻る969
+the benefits outweigh the risks,利益が危険を上回る970
+elegant drapery,上品なカーテン971
+Gas prices are poised to fall.,ガソリン価格は下がる見込みだ972
+a sleek and attractive design,すっきりして魅力的なデザイン973
+an exemplary employee,模範的な従業員974
+a contingency plan,緊急時対応計画975
+for a nominal fee,わずかな料金で976
+deplete the budget,予算を使い果たす977
+the proprietor of a clothing shop,衣料品店の店主978
+copyright infringement,著作権侵害979
+We will waive the shipping charge.,送料は免除します980
+alleviate traffic congestion,交通渋渋緩和する981
+an avid reader,熱心な読書家982
+a gala dinner,祝賀晩餐会983
+a stagnant market,停滞した市場984
+a calm demeanor,落ち着いた態度985
+perishable food items,生鮮食品986
+take a detour,回り道をする987
+use salt sparingly,塩を控えめに使う988
+temperature fluctuations,気温の変動989
+invigorate a company,会社を活気づける990
+Formal attire is required in the office.,職場では正装が必要です991
+Salary will be commensurate with the experience.,給与は経験に応じて決まります992
+a purveyor of groceries,食料品の販売業者993
+the keynote speaker,基調講演者994
+poor ventilation,換気不良995
+expedite a process,手続きを早める996
+liquidate a company,会社を清算する997
+since the inception,発足以来998
+through your unwavering efforts,あなたの揺るぎない努力によって999
+Your vocabulary has grown exponentially.,あなたの語彙力は飛躍的に伸びた1000
+They're facing each other.,彼らは向かい合っている1001
+A man is wearing headphones.,男性がヘッドホンを着けている1002
+A man is pointing at a screen.,男性が画面を指さしている1003
+The shelves are full of books.,棚は本でいっぱいだ1004
+A man is standing on a ladder.,男性がはしごの上に立っている1005
+A man is trimming some bushes.,男性が茂みを刈り込んでいる1006
+A woman is examining a document.,女性が書類を調べている1007
+They're greeting each other.,彼らは挨拶を交わしている1008
+A man is sweeping the floor.,男性が床を掃いている1009
+He's adjusting some equipment.,彼が機器を調整している1010
+Some people are heading toward a plane.,何人かの人が飛行機に向かっている1011
+She's handling some luggage.,彼女が荷物を扱っている1012
+A ladder is leaning against a building.,はしごが建物に立てかけられている1013
+A woman is paying a cashier.,女性がレジ係に支払っている1014
+The floor is being polished.,床が磨かれている1015
+A man is holding a lid open.,男性がふたを開けたまま支えている1016
+A woman is sitting on a stool.,女性がスツールに座っている1017
+They're walking on a crosswalk.,彼らは横断歩道を歩いている1018
+He's working beside a brick wall.,彼がれんが壁のそばで作業している1019
+Some pictures are hanging on the wall.,何枚かの絵が壁に掛かっている1020
+A man is kneeling on the floor.,男性が床にひざまずいている1021
+A woman is sewing an item.,女性が品物を縫っている1022
+Ladders are propped up against a wall.,はしごが壁に立てかけられている1023
+A man is standing on a walkway.,男性が通路の上に立っている1024
+They're walking side by side.,彼らは並んで歩いている1025
+Some people are applauding the presenter.,何人かの人が発表者に拍手している1026
+A woman is watering some plants.,女性が植物に水をやっている1027
+A woman is fastening an apron.,女性がエプロンを着けている1028
+There are some boxes in the hallway.,廊下にいくつかの箱がある1029
+The man is using a microscope.,男性が顕微鏡を使っている1030
+Some paintings are mounted on a wall.,何枚かの絵画が壁に飾られている1031
+A band is performing for the audience.,バンドが観客の前で演奏している1032
+Some people are walking through a plaza.,何人かの人が広場を歩いている1033
+A woman is wearing gloves.,女性が手袋をしている1034
+Printers have been placed against the wall.,プリンターが壁際に置かれている1035
+A woman is wearing protective clothing.,女性が防護服を着ている1036
+Some papers are scattered on a table.,何枚かの紙がテーブルの上に散らばっている1037
+People are gathered near an artwork.,人々が美術作品の近くに集まっている1038
+A ladder is casting a shadow.,はしごが影を落としている1039
+He's paging through reading material.,彼が読み物をめくっている1040
+Cars are parked in a row.,車が一列に駐車している1041
+She's reaching into her bag.,彼女がバッグの中に手を入れている1042
+Diners are seated inside.,食事客が中に座っている1043
+A woman is pouring some juice.,女性がジュースを注いでいる1044
+They're loading some boxes onto the truck.,彼らはトラックに箱を積み込んでいる1045
+Passengers are boarding a train.,乗客が列車に乗り込んでいる1046
+There are pots on the table.,テーブルの上に鍋がある1047
+He's walking by a garbage can.,彼がごみ箱のそばを歩いている1048
+Some dishes are stacked on a table.,皿がテーブルの上に積み重ねられている1049
+She's opening a drawer.,彼女が引き出しを開けている1050
+He's playing an instrument.,彼が楽器を演奏している1051
+She's removing a book from her handbag.,彼女がハンドバッグから本を取り出している1052
+They're loading some cargo onto a ship.,彼らは船に貨物を積み込んでいる1053
+Some people are seated in an auditorium.,何人かの人が講堂に座っている1054
+He's leaning on a railing.,彼が手すりにもたれている1055
+Potted plants have been arranged in rows.,鉢植えが列に並べられている1056
+A desk is positioned between chairs.,机が椅子の間に置かれている1057
+People are browsing some items.,人々が品物を見て回っている1058
+Buildings are reflected in the water.,建物が水面に映っている1059
+A map is laid out on the table.,地図がテーブルの上に広げられている1060
+They're talking near a doorway.,彼らは出入口の近くで話している1061
+She's wheeling a cart.,彼女がカートを押している1062
+Some steps lead to a building.,階段が建物へ続いている1063
+They're sitting opposite each other.,彼らは向かい合って座っている1064
+There are some mountains in the distance.,遠くに山々が見える1065
+A man is mowing the lawn.,男性が芝生を刈っている1066
+The vase is filled with flowers.,花瓶に花が生けられている1067
+A fountain is spraying water.,噴水が水を吹き上げている1068
+Some people are waiting at the intersection.,何人かの人が交差点で待っている1069
+There are some chairs on the platform.,ホームにいくつかの椅子がある1070
+Some boats are tied to the dock.,何そうかのボートが船着き場につながれている1071
+He's glancing at a magazine.,彼が雑誌にちらっと目をやっている1072
+There are some dishes in the cupboard.,戸棚の中に皿がいくつかある1073
+A woman is exiting a vehicle.,女性が車から降りている1074
+Some people are sitting at their workstations.,何人かの人がそれぞれの作業机に座っている1075
+He is gazing out the window.,彼は窓の外を見つめている1076
+A car is parked at a curb.,車が縁石のそばに駐車している1077
+The roof of the house is slanted.,その家の屋根は傾斜している1078
+A man is climbing a staircase.,男性が階段を上っている1079
+There are spectators in the stadium.,競技場に観客がいる1080
+A woman is standing in a courtyard.,女性が中庭に立っている1081
+Some pottery is being displayed.,陶器が展示されている1082
+Some cookware is arranged on the counter.,調理器具がカウンターに並べられている1083
+High-rise buildings overlook the water.,高層ビルが水辺を見下ろしている1084
+A boat is sailing past a pier.,ボートが桟橋のそばを通って進んでいる1085
+Some people are gathered near a lighthouse.,何人かの人が灯台の近くに集まっている1086
+A man is drawing a portrait.,男性が肖像画を描いている1087
+The reception desk is unattended.,受付には誰もいない1088
+Some people are standing under an awning.,何人かの人がひさしの下に立っている1089
+A patio overlooks a river.,テラスが川を見下ろしている1090
+The chairs are unoccupied.,椅子には誰も座っていない1091
+Pedestrians are crossing the street.,歩行者が通りを渡っている1092
+Some crates are being transported.,木箱が運ばれている1093
+She's arranging utensils on a table.,彼女がテーブルの上に食器類を並べている1094
+Some people are stationed at a counter.,何人かの人がカウンターのところに立っている1095
+Workers are cleaning the window panes.,作業員が窓ガラスを掃除している1096
+She's strolling along the shore.,彼女が岸辺を散歩している1097
+Some lampposts line the street.,街路に街灯が並んでいる1098
+A man is pushing a wheelbarrow.,男性が手押し車を押している1099
+A canopy is shading some merchandise.,天幕が商品に日陰を作っている1100
+board of directors,取締役会1101
+accounting department,経理部1102
+marketing department,マーケティング部1103
+human resources department,人事部1104
+personnel department,人事部1105
+administrative department,管理部1106
+legal department,法務部1107
+sales department,営業部1108
+technology department,技術部1109
+security department,警備部1110
+purchasing department,購買部1111
+payroll department,給与計算部1112
+public relations department,広報部1113
+advertising department,広告部1114
+general affairs department,総務部1115
+plumber,配管工1116
+mechanic,整備士1117
+carpenter,大工1118
+welder,溶接工1119
+electrician,電気工1120
+civil engineer,土木技師1121
+dentist,歯科医1122
+surgeon,外科医1123
+pharmacist,薬剤師1124
+veterinarian,獣医1125
+baker,パン職人1126
+florist,花屋1127
+cleaner’s,クリーニング店1128
+locksmith,鍵屋1129
+moving company worker,引っ越し業者の作業員1130
+home improvement center clerk,ホームセンター店員1131
+printer,印刷業者1132
+courier,配達員1133
+real estate agent,不動産業者1134
+accountant,会計士1135
+chemist,化学者1136
+auditor,監査人1137
+historian,歴史学者1138
+anthropologist,人類学者1139
+lawyer,弁護士1140
+attorney,弁護士1141
+biologist,生物学者1142
+professor,教授1143
+botanist,植物学者1144
+paralegal,法律事務補助員1145
+scientist,科学者1146
+journalist,記者1147
+correspondent,特派員1148
+announcer,アナウンサー1149
+editor,編集者1150
+host,司会者1151
+proofreader,校正者1152
+novelist,小説家1153
+librarian,司書1154
+flight attendant,客室乗務員1155
+tour guide,観光案内人1156
+concierge,コンシェルジュ1157
+housekeeping staff,客室係1158
+conductor,車掌1159
+travel agent,旅行代理店員1160
+architect,建築家1161
+photographer,写真家1162
+choreographer,振付師1163
+actor,男優1164
+actress,女優1165
+curator,学芸員1166
+receptionist,受付係1167
+ambassador,大使1168
+secretary,秘書1169
+security guard,警備員1170
+spokesperson,広報担当者1171
+cashier,レジ係1172
+operator,オペレーター1173
+server,給仕係1174
+attendant,係員1175
+accounting,会計学1176
+architecture,建築学1177
+astronomy,天文学1178
+biology,生物学1179
+chemistry,化学1180
+ecology,生態学1181
+economics,経済学1182
+education,教育学1183
+engineering,工学1184
+fine arts,美術1185
+history,歴史学1186
+journalism,ジャーナリズム1187
+law,法学1188
+linguistics,言語学1189
+literature,文学1190
+mathematics,数学1191
+medicine,医学1192
+philosophy,哲学1193
+physics,物理学1194
+psychology,心理学1195
+robotics,ロボット工学1196
+sociology,社会学1197
+political science,政治学1198
+computer science,情報科学1199
+environmental science,環境科学1200
+due to,～が原因で1201
+owing to,～のために1202
+despite,～にもかかわらず1203
+in spite of,～にもかかわらず1204
+notwithstanding,～にもかかわらず1205
+given,～を考えると1206
+in light of,～を考慮して1207
+in the event of,～の場合には1208
+in addition to,～に加えて1209
+except for,～を除いて1210
+regardless of,～に関係なく1211
+instead of,～の代わりに1212
+irrespective of,～に関係なく1213
+whereas,～である一方で1214
+whether,～かどうか1215
+as soon as,～するとすぐに1216
+once,ひとたび～すれば1217
+unless,～でない限り1218
+now that,今や～なので1219
+so that,～するために1220
+in order that,～するように1221
+although,～だけれども1222
+though,～だけれども1223
+even though,たとえ～であっても1224
+even if,たとえ～でも1225
+provided that,～という条件で1226
+as long as,～する限り1227
+in case,～の場合に備えて1228
+given that,～を考えると1229
+in the event that,もし～なら1230
+insofar as,～する限りにおいて1231
+inasmuch as,～であるので1232
+therefore,したがって1233
+however,しかしながら1234
+nevertheless,それにもかかわらず1235
+moreover,そのうえ1236
+furthermore,さらに1237
+consequently,その結果1238
+thereby,それによって1239
+thus,このように1240
+meanwhile,その間に1241
+accommodate a request,要望に応じる1242
+The hotel can accommodate 300 guests.,そのホテルは300人の宿泊客を収容できる1243
+open a bank account,銀行口座を開く1244
+account for 50% of sales,売上の50パーセントを占める1245
+address a problem,問題に対処する1246
+address the audience,聴衆に話しかける1247
+address questions to Tex,質問をテックスに向ける1248
+an opening address,開会のあいさつ1249
+a self-addressed envelope,宛名を書いた返信用封筒1250
+Steve's last public appearance,スティーブの最後の公の場への登場1251
+a unique appearance,独特の外見1252
+an appearance in a film,映画への出演1253
+apply for the position,その職に応募する1254
+apply the cream to the skin,クリームを肌に塗る1255
+The rule applies to all employees.,その規則は全従業員に適用される1256
+a doctor's appointment,医者の予約1257
+the appointment of a new CEO,新しいCEOの任命1258
+a magazine article,雑誌記事1259
+household articles,家庭用品1260
+a battery of tests,一連の検査1261
+The board of directors met yesterday.,取締役会は昨日開かれた1262
+information on a bulletin board,掲示板の情報1263
+book a room,部屋を予約する1264
+We do not carry that item.,当店ではその品物は扱っていません1265
+A woman is carrying a briefcase.,女性がブリーフケースを持っている1266
+carry out a task,仕事を実行する1267
+by a certain time,ある時刻までに1268
+The work is nearly complete.,その仕事はほぼ完了している1269
+a complete range of services,幅広い完全なサービス1270
+Tex finally completed the work.,テックスはついにその仕事を終えた1271
+complete a form,書類に記入し終える1272
+under consideration,検討中で1273
+Tex has no consideration for others.,テックスは他人への配慮がない1274
+one free copy of the book,その本の無料の1冊1275
+The local media covered the event.,地元メディアがそのイベントを報道した1276
+Leaves are covering the road.,葉が道を覆っている1277
+The fee covers lunch.,その料金には昼食が含まれている1278
+Most employees were critical of the plan.,大半の従業員はその計画に批判的だった1279
+the most critical factor,最も重要な要因1280
+decline to respond,返答を断る1281
+Our sales have declined.,私たちの売上は減少した1282
+a dictionary definition,辞書の定義1283
+high-definition monitor,高精細モニター1284
+deliver a product,製品を届ける1285
+deliver a speech,演説をする1286
+demonstrate how to use the system,そのシステムの使い方を実演する1287
+demonstrate excellent communication skills,優れた意思疎通能力を示す1288
+research and development,研究開発1289
+recent developments in the area,その地域の最近の発展1290
+a new housing development,新しい住宅開発地1291
+opportunities for professional development,職業能力向上の機会1292
+directions to the museum,博物館への道順1293
+under the direction of Mr. Kato,加藤氏の指導の下で1294
+in the same direction,同じ方向に1295
+a drawing for prizes,景品抽選1296
+a drawing class,デッサンの授業1297
+a due date,締切日1298
+due to rain,雨のため1299
+Special thanks are due to Mr. Kato.,特に加藤氏に感謝します1300
+membership dues,会費1301
+We are due to visit Tokyo tomorrow.,私たちは明日東京を訪れる予定です1302
+the edge of the water,水辺1303
+have an edge over others,他者より優位に立つ1304
+express appreciation,感謝を表す1305
+express delivery,速達配達1306
+without express consent,明示的な同意なしに1307
+extend a deadline,締め切りを延ばす1308
+extend an apology,謝罪を述べる1309
+Our service extends to various areas.,私たちのサービスはさまざまな地域に及ぶ1310
+extend an invitation,招待する1311
+bus fare,バス運賃1312
+traditional fare,伝統料理1313
+in a timely fashion,適時に1314
+old-fashioned clothes,古風な服1315
+The item is featured in the advertisement.,その品物は広告で取り上げられている1316
+The exhibition features paintings by Taro Okamoto.,その展覧会では岡本太郎の絵画が展示されている1317
+a feature article,特集記事1318
+the main feature of the product,その製品の主な特徴1319
+in the field of art,芸術の分野で1320
+A man has stopped near a field.,男性が野原の近くで立ち止まっている1321
+field questions,質問に答える1322
+pay a $10 fine,10ドルの罰金を払う1323
+I look forward to hearing from you.,お返事をお待ちしております1324
+forward an e-mail,メールを転送する1325
+go forward with a plan,計画を進める1326
+A woman is holding a book.,女性が本を持っている1327
+The event will be held next week.,その行事は来週開かれる1328
+hold the position of director,取締役の地位にある1329
+hold an item for a customer,顧客のために商品を取り置きする1330
+Mr. Kato holds a teaching license.,加藤氏は教員免許を持っている1331
+The facility houses six laboratories.,その施設には6つの研究室がある1332
+the input data,入力データ1333
+Thank you for your input.,ご意見ありがとうございます1334
+What are the listeners invited to do?,聞き手は何をするよう求められているか1335
+issue a comment,意見を述べる1336
+issue a ticket,切符を発行する1337
+address an issue,問題に対処する1338
+the August issue,8月号1339
+the last ten years,過去10年間1340
+The meeting will last an hour.,会議は1時間続く1341
+A good coat will last ten years.,よいコートは10年もつ1342
+the lead engineer,主任技師1343
+lead a discussion,議論を主導する1344
+The project will lead to more jobs.,その計画は雇用増加につながる1345
+leave a message,伝言を残す1346
+leave a job,仕事を辞める1347
+Please leave the door open.,ドアを開けたままにしてください1348
+Mr. Kato is on leave.,加藤氏は休暇中だ1349
+I can manage it alone.,私はそれを一人で何とかできる1350
+Tex managed to pay for the trip.,テックスは何とか旅行代を払えた1351
+manage a store,店を経営する1352
+Look at the picture marked number 1.,1番と記された絵を見なさい1353
+Today marks our 10th anniversary.,今日は私たちの10周年に当たる1354
+miss the mark,的を外す1355
+Tex has already made his mark.,テックスはすでに名を成している1356
+Few companies can match our quality service.,当社ほど質の高いサービスを提供できる会社はほとんどない1357
+match a price,価格を合わせる1358
+meet requirements,要件を満たす1359
+meet the deadline,締め切りに間に合う1360
+review the minutes,議事録を確認する1361
+object to a plan,計画に反対する1362
+the object of the research,その研究の目的1363
+a metal object,金属製の物体1364
+Once Tex arrives, we will leave.,テックスが着いたら私たちは出発する1365
+Tex once owned a car.,テックスは以前車を所有していた1366
+in descending order,降順で1367
+in order to begin,始めるために1368
+an otherwise impossible task,そうでなければ不可能な仕事1369
+unless otherwise noted,特に断りがない限り1370
+Hurry up. Otherwise you'll be late.,急ぎなさい。さもないと遅れますよ1371
+an outgoing person,社交的な人1372
+the outgoing president,退任する社長1373
+outstanding service,卓越したサービス1374
+outstanding balance,未払い残高1375
+book a table for a party of five,5人分の席を予約する1376
+the third party,第三者1377
+Some plants have been placed in pots.,植物が鉢に入れられている1378
+build a new plant,新工場を建てる1379
+Some people are planting trees.,何人かの人が木を植えている1380
+post office,郵便局1381
+post changes on a bulletin board,変更点を掲示板に掲示する1382
+post comments on the Internet,インターネットにコメントを投稿する1383
+Tex was posted to Moscow.,テックスはモスクワに赴任した1384
+common business practice,一般的な商習慣1385
+a doctor who practices in Australia,オーストラリアで開業している医師1386
+practice a unique method,独自の方法を実践する1387
+present an award,賞を授与する1388
+present an ID card,身分証を提示する1389
+from the past to the present,過去から現在まで1390
+All members present agreed.,出席者全員が賛成した1391
+the present address,現在の住所1392
+All our products are produced locally.,当社の製品はすべて地元で生産されている1393
+the produce section of a supermarket,スーパーの青果売り場1394
+professional advice,専門的助言1395
+professional achievements,職業上の業績1396
+professional behavior,職業人としての態度1397
+project that sales will increase by 10%,売上が10パーセント増えると予測する1398
+project a smart image,洗練された印象を与える1399
+project an image onto a wall,壁に映像を映す1400
+Tex was promoted to general manager.,テックスは部長に昇進した1401
+promote a product,製品を売り込む1402
+at the rate of 20% a year,年間20パーセントの割合で1403
+group rates,団体料金1404
+rate a hotel,ホテルを評価する1405
+You can reach me by e-mail.,メールで連絡できます1406
+in order to reach younger readers,より若い読者に届くために1407
+reach a sales target,売上目標に達する1408
+reach a new market,新しい市場に到達する1409
+reach Tokyo early in the morning,朝早く東京に着く1410
+I can't recall his name.,私は彼の名前を思い出せない1411
+voluntary recall of products,製品の自主回収1412
+The reception will take place next week.,歓迎会は来週行われる1413
+Take a seat in the reception area.,受付エリアでお掛けください1414
+The reception is bad in this area.,この地域では電波が悪い1415
+replace the batteries,電池を交換する1416
+Who's going to replace Tex?,誰がテックスの代わりをするのですか1417
+make reservations,予約をする1418
+have reservations about,～に不安を感じる1419
+run a company,会社を経営する1420
+run an advertisement,広告を掲載する1421
+Major newspapers ran the story.,主要新聞がその記事を掲載した1422
+The play will run for three days.,その劇は3日間上演される1423
+sample local food,地元の食べ物を味わう1424
+secure access to the information,その情報への安全なアクセスを確保する1425
+A boat is secured to the dock.,ボートが船着き場につながれている1426
+secure a contract,契約を確保する1427
+a highly sensitive camera,高感度のカメラ1428
+sensitive information,機密情報1429
+to better serve our customers,よりよく顧客に応えるために1430
+A dessert is being served.,デザートが出されている1431
+serve as the president,社長を務める1432
+The copy machine has been serviced.,コピー機は整備された1433
+I need your signature on this form.,この書類にあなたの署名が必要です1434
+the chef's signature dish,その料理人の看板料理1435
+find a solution,解決策を見つける1436
+mix a solution,溶液を混ぜる1437
+Tex Kato stars in the film.,加藤テックスがその映画に主演している1438
+a monthly statement,月次明細書1439
+issue a statement,声明を出す1440
+a steep slope,急な坂1441
+steep prices,高すぎる価格1442
+Prices are subject to change.,価格は変更される場合があります1443
+an expert on the subject,その主題の専門家1444
+subjects of a study,研究対象1445
+suggest a change,変更を提案する1446
+What is suggested about the hotel?,そのホテルについて何が示唆されているか1447
+the data suggests that,そのデータは～を示唆している1448
+suspend production,生産を停止する1449
+A bridge is suspended above a stream.,橋が小川の上に架かっている1450
+a table of contents,目次1451
+in terms of price,価格の点で1452
+the terms and conditions of a contract,契約の条件1453
+technical terms,専門用語1454
+What's your view on the subject?,その件についてあなたはどう思いますか1455
+parts weighing more than 5kg,5キログラムを超える部品1456
+weigh a package,荷物の重さを量る1457
+weigh the costs against the benefits,費用と利益を比較検討する1458
+withdraw a product from the market,製品を市場から回収する1459
+Tex withdrew 5,000 yen from the bank.,テックスは銀行から5000円引き出した1460
+withdraw support for the company,その会社への支援を取りやめる1461
+of all the works in the museum,美術館の全作品のうち1462`;
+
+let params = {
+    rangeStart: 1,
+    rangeEnd: 1462,
+    speechRate: 1.6,
+    engTime: 1.0,
+    japTime: 1.0
+};
+
+let currentQueue = [], trainingResults = [], activeWord = null;
+let engTimer = null, japTimer = null;
+
+window.onload = () => {
+    const saved = localStorage.getItem("teppeki_gold_v1");
+    if(saved) params = {...params, ...JSON.parse(saved)};
+    updateAllDisplays();
+    renderSections();
+};
+
+function changeVal(key, step) {
+    params[key] = parseFloat((params[key] + step).toFixed(1));
+    if(params[key] < 0.1) params[key] = 0.1;
+    if(key.includes('range')) params[key] = Math.max(1, Math.round(params[key]));
+    if(key === 'rangeEnd') params[key] = Math.min(params[key], 1462);
+    updateAllDisplays();
+    localStorage.setItem("teppeki_gold_v1", JSON.stringify(params));
+}
+
+function updateAllDisplays() {
+    Object.keys(params).forEach(key => {
+        const el = document.getElementById(`disp_${key}`);
+        if(el) el.textContent = params[key];
+    });
+}
+
+function renderSections() {
+    const nav = document.getElementById("sectionContainer");
+    nav.innerHTML = "";
+    for(let i=1; i<=1462; i+=100) {
+        const end = Math.min(i+99, 1462);
+        const btn = document.createElement("button");
+        btn.className = "nav-item";
+        btn.textContent = `${i}-${end}`;
+        btn.onclick = () => {
+            params.rangeStart = i;
+            params.rangeEnd = end;
+            updateAllDisplays();
+        };
+        nav.appendChild(btn);
+    }
+}
+
+function initTraining() {
+    const lines = FULL_DATA.trim().split("\n");
+    const targets = lines.slice(params.rangeStart - 1, params.rangeEnd).map(l => {
+        const p = l.split(",");
+        return { en: p[0].trim(), ja: p[1].trim() };
+    });
+
+    if(targets.length === 0) return alert("範囲が正しくありません");
+
+    currentQueue = targets.sort(() => Math.random() - 0.5);
+    trainingResults = [];
+    document.getElementById("setup").style.display = "none";
+    document.getElementById("app").style.display = "flex";
+    nextWord();
+}
+
+function nextWord() {
+    if(currentQueue.length === 0) return finishTraining();
+    
+    activeWord = currentQueue.pop();
+    const total = trainingResults.length + currentQueue.length + 1;
+    document.getElementById("infoText").textContent = `${trainingResults.length + 1} / ${total}`;
+    document.getElementById("progressBar").style.width = `${(trainingResults.length / total) * 100}%`;
+    
+    document.getElementById("englishWord").textContent = activeWord.en;
+    document.getElementById("japaneseWord").textContent = "";
+    
+    const gauge = document.getElementById("gauge");
+    gauge.style.transition = "none";
+    gauge.style.width = "0%";
+
+    speak(activeWord.en, "en-US");
+
+    clearTimeout(engTimer);
+    engTimer = setTimeout(showAnswer, params.engTime * 1000);
+}
+
+function showAnswer() {
+    document.getElementById("japaneseWord").textContent = activeWord.ja;
+    speak(activeWord.ja, "ja-JP");
+
+    const gauge = document.getElementById("gauge");
+    gauge.style.transition = `width ${params.japTime}s linear`;
+    gauge.style.width = "100%";
+
+    clearTimeout(japTimer);
+    japTimer = setTimeout(() => processAnswer(false), params.japTime * 1000);
+}
+
+function processAnswer(isCorrect) {
+    clearTimeout(engTimer);
+    clearTimeout(japTimer);
+    trainingResults.push({ ...activeWord, ok: isCorrect });
+    nextWord();
+}
+
+function speak(text, lang) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;
+    u.rate = params.speechRate;
+    speechSynthesis.speak(u);
+}
+
+function finishTraining() {
+    document.getElementById("app").style.display = "none";
+    document.getElementById("report").style.display = "block";
+    const missed = trainingResults.filter(r => !r.ok);
+    document.getElementById("resultScore").textContent = `正解: ${trainingResults.length - missed.length} / ${trainingResults.length}`;
+    document.getElementById("missedArea").value = missed.map(m => `${m.en},${m.ja}`).join("\n");
+}
+
+document.onkeydown = (e) => {
+    if(document.getElementById("app").style.display === "flex") {
+        const k = e.key.toLowerCase();
+        if(k === "z") processAnswer(true);
+        if(k === "a") processAnswer(false);
+    }
+};
+</script>
+</body>
+</html>
