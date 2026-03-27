@@ -8,94 +8,86 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         :root {
-            --bg: #030712;
-            --container: #111827;
+            --bg: #0a0f1d;
+            --container: #161e2d;
             --card-bg: #1f2937;
-            --text: #f9fafb;
-            --primary: #3b82f6;
+            --text: #f3f4f6;
+            --primary: #d4af37;
             --success: #10b981;
             --danger: #ef4444;
-            --gray: #6b7280;
-            --accent: #8b5cf6;
-            --gold: #fbbf24;
-            --silver: #94a3b8;
+            --gray: #9ca3af;
+            --accent: #6366f1;
+            --gold: #f59e0b;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         html, body { 
             margin: 0; width: 100%; height: 100%; background: var(--bg); 
-            font-family: 'Inter', system-ui, -apple-system, sans-serif; color: var(--text); 
-            overflow-x: hidden; touch-action: manipulation;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; 
+            color: var(--text); overflow-x: hidden; touch-action: manipulation;
         }
         
-        #setup, #report { padding: 20px; min-height: 100vh; overflow-y: auto; display: none; }
+        #setup, #report { padding: 30px 20px; min-height: 100vh; display: none; }
         #setup.active, #report.active { display: block; }
-        #app { display: none; position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 12px; z-index: 100; }
+        #app { display: none; position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 15px; z-index: 100; }
         #app.active { display: flex; }
 
-        .container { max-width: 650px; margin: 0 auto; background: var(--container); border-radius: 28px; padding: 20px; border: 1px solid #374151; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-        h1 { font-size: 24px; text-align: center; margin: 0 0 15px 0; color: var(--gold); font-weight: 900; letter-spacing: 1px; }
+        .container { max-width: 600px; margin: 0 auto; background: var(--container); border-radius: 32px; padding: 25px; border: 1px solid #374151; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        h1 { font-size: 26px; text-align: center; margin: 0 0 20px 0; color: var(--gold); font-weight: 800; letter-spacing: 2px; }
 
-        .dashboard { background: rgba(31, 41, 55, 0.5); border-radius: 24px; padding: 18px; margin-bottom: 20px; border: 1px solid #374151; }
-        .db-bar { height: 14px; display: flex; border-radius: 7px; overflow: hidden; background: #030712; margin-bottom: 12px; }
-        .db-seg { height: 100%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .dashboard { background: rgba(0, 0, 0, 0.2); border-radius: 20px; padding: 20px; margin-bottom: 25px; border: 1px solid #374151; }
+        .db-bar { height: 12px; display: flex; border-radius: 6px; overflow: hidden; background: #000; margin-bottom: 15px; }
+        .db-seg { height: 100%; transition: width 0.8s ease-in-out; }
         .seg-a { background: var(--gold); }
         .seg-b { background: var(--accent); }
         .seg-c { background: var(--danger); }
-        .seg-new { background: #4b5563; }
-        .db-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .seg-new { background: #374151; }
+        .db-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .lg-item { text-align: center; }
-        .lg-label { font-size: 10px; color: var(--gray); display: block; margin-bottom: 2px; }
-        .lg-val { font-size: 12px; font-weight: 900; }
+        .lg-label { font-size: 10px; color: var(--gray); display: block; margin-bottom: 4px; font-weight: bold; }
+        .lg-val { font-size: 13px; font-weight: 800; }
 
-        .label { font-size: 11px; font-weight: 800; color: var(--silver); margin: 16px 0 6px 4px; display: flex; justify-content: space-between; align-items: center; }
-        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-        @media (max-width: 420px) { .param-grid { grid-template-columns: 1fr; } }
-
-        .input-group { background: #1f2937; padding: 12px; border-radius: 18px; border: 1px solid #374151; }
-        .input-group span { font-size: 10px; margin-bottom: 6px; color: #9ca3af; display: block; font-weight: bold; }
+        .input-group { background: #1f2937; padding: 15px; border-radius: 20px; border: 1px solid #4b5563; margin-bottom: 15px; }
+        .input-group span { font-size: 11px; margin-bottom: 8px; color: var(--gray); display: block; font-weight: 800; text-transform: uppercase; }
         
-        .adj-container { display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .adj-btn { background: #334155; color: white; border: none; padding: 10px 14px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; min-width: 44px; }
-        .adj-btn:active { transform: scale(0.9); background: var(--primary); }
+        .adj-container { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .adj-btn { background: #374151; color: white; border: none; width: 48px; height: 40px; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; }
+        .adj-btn:active { background: var(--gold); transform: scale(0.95); }
 
-        input { width: 75px; background: transparent; border: none; color: white; font-size: 20px; font-weight: 900; text-align: center; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { width: 90px; background: transparent; border: none; color: #fff; font-size: 22px; font-weight: 800; text-align: center; }
+        textarea { width: 100%; height: 60px; background: rgba(0,0,0,0.3); color: var(--gray); border: 1px solid #374151; border-radius: 15px; padding: 12px; font-size: 12px; margin-top: 10px; resize: none; outline: none; }
 
-        .range-box { background: linear-gradient(145deg, #451a03, #111827); padding: 18px; border-radius: 24px; border: 1px solid var(--gold); margin-bottom: 18px; }
-        textarea { width: 100%; height: 55px; background: rgba(0,0,0,0.4); color: #94a3b8; border: 1px solid #374151; border-radius: 14px; padding: 12px; font-size: 12px; margin-top: 6px; outline: none; resize: none; word-break: break-all; }
+        .main-btn { width: 100%; height: 70px; border: none; border-radius: 24px; font-size: 24px; font-weight: 800; cursor: pointer; background: var(--gold); color: #000; transition: 0.3s; margin-top: 10px; }
+        .main-btn:hover { filter: brightness(1.1); }
+        .main-btn:active { transform: scale(0.98); }
 
-        button.main-btn { width: 100%; height: 64px; border: none; border-radius: 22px; font-size: 22px; font-weight: 900; cursor: pointer; background: var(--gold); color: #000; transition: 0.2s; box-shadow: 0 12px 24px -6px rgba(251, 191, 36, 0.4); }
-        button.main-btn:active { transform: scale(0.97); }
-
-        .sm-btn { background: #374151; color: white; border: none; padding: 7px 14px; border-radius: 10px; font-size: 11px; cursor: pointer; font-weight: 800; }
-        .io-btn { background: var(--accent); color: white; border: none; padding: 7px 14px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; }
+        .io-btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 800; cursor: pointer; margin-left: 5px; }
         
-        #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 25px; gap: 10px; background: var(--card-bg); border-radius: 48px; margin: 10px 0; position: relative; border: 1px solid #374151; box-shadow: inset 0 0 40px rgba(0,0,0,0.4); }
-        #itemBadge { position: absolute; top: 30px; font-size: 14px; font-weight: 900; padding: 4px 18px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 2px solid currentColor; }
+        #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; background: var(--card-bg); border-radius: 50px; margin: 15px 0; position: relative; border: 1px solid #374151; box-shadow: inset 0 0 50px rgba(0,0,0,0.5); }
+        #itemBadge { position: absolute; top: 40px; font-size: 12px; font-weight: 800; padding: 6px 20px; border-radius: 30px; border: 2px solid currentColor; letter-spacing: 1px; }
         
-        #questionText { font-size: 48px; font-weight: 900; line-height: 1.1; color: var(--text); word-break: break-all; max-width: 95%; margin-top: 30px; }
-        #answerText { font-size: 28px; color: var(--gold); font-weight: 800; visibility: hidden; min-height: 1.5em; margin-top: 15px; }
-        #answerText.visible { visibility: visible; }
+        #questionText { font-size: 42px; font-weight: 900; line-height: 1.2; margin-bottom: 20px; color: #fff; }
+        #answerText { font-size: 26px; color: var(--gold); font-weight: 700; min-height: 2em; opacity: 0; transition: opacity 0.3s; }
+        #answerText.visible { opacity: 1; }
         
-        #timerTrack { width: 100%; height: 10px; background: #030712; margin-top: 25px; border-radius: 10px; overflow: hidden; opacity: 0; }
+        #timerTrack { width: 80%; height: 6px; background: #111827; margin-top: 30px; border-radius: 3px; overflow: hidden; opacity: 0; }
         #timerTrack.active { opacity: 1; }
         #timerBar { height: 100%; background: var(--danger); width: 0%; }
 
-        .progress-container { width: 100%; height: 8px; background: #1f2937; border-radius: 10px; overflow: hidden; margin: 8px 0; }
-        #progressBar { height: 100%; background: var(--gold); width: 0%; transition: width 0.3s linear; }
+        .progress-container { width: 100%; height: 6px; background: #1f2937; border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+        #progressBar { height: 100%; background: var(--gold); width: 0%; transition: width 0.4s ease; }
         
-        .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; margin-bottom: 12px; }
-        .ans-btn { height: 90px; border: none; border-radius: 32px; color: white; font-size: 26px; font-weight: 900; cursor: pointer; transition: 0.15s; }
-        .ans-btn:active { transform: scale(0.94); }
-        #correctBtn { background: var(--success); }
-        #wrongBtn { background: var(--danger); }
+        .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; margin-bottom: 20px; }
+        .ans-btn { height: 100px; border: none; border-radius: 35px; color: white; font-size: 28px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        #correctBtn { background: var(--success); box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4); }
+        #wrongBtn { background: var(--danger); box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.4); }
+        .ans-btn:active { transform: translateY(4px); filter: brightness(0.9); }
     </style>
 </head>
 <body>
 
 <div id="setup" class="active">
     <div class="container">
-        <h1 id="titleLabel">金の英単語 修行</h1>
+        <h1>金の英単語 修行</h1>
 
         <div class="dashboard">
             <div class="db-bar">
@@ -105,57 +97,58 @@
                 <div id="bar-new" class="db-seg seg-new"></div>
             </div>
             <div class="db-legend">
-                <div class="lg-item"><span class="lg-label">習得(a)</span><span id="val-a" class="lg-val" style="color:var(--gold)">0</span></div>
-                <div class="lg-item"><span class="lg-label">継続(b)</span><span id="val-b" class="lg-val" style="color:var(--accent)">0</span></div>
-                <div class="lg-item"><span class="lg-label">苦手(c)</span><span id="val-c" class="lg-val" style="color:var(--danger)">0</span></div>
-                <div class="lg-item"><span class="lg-label">未着手</span><span id="val-new" class="lg-val" style="color:var(--silver)">0</span></div>
+                <div class="lg-item"><span class="lg-label">習得済</span><span id="val-a" class="lg-val" style="color:var(--gold)">0</span></div>
+                <div class="lg-item"><span class="lg-label">継続中</span><span id="val-b" class="lg-val" style="color:var(--accent)">0</span></div>
+                <div class="lg-item"><span class="lg-label">要復習</span><span id="val-c" class="lg-val" style="color:var(--danger)">0</span></div>
+                <div class="lg-item"><span class="lg-label">未着手</span><span id="val-new" class="lg-val" style="color:var(--gray)">0</span></div>
             </div>
         </div>
         
-        <div class="input-group" style="margin-bottom:15px; background: #1e1b4b;">
-            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:6px;">
-                <span style="color:#fff">進捗復元 / 書き出し</span>
-                <div style="display:flex; gap:6px;">
-                    <button class="io-btn" style="background: var(--success);" onclick="importData()">復元</button>
-                    <button class="io-btn" onclick="exportData()">出す</button>
+        <div class="input-group">
+            <div style="display:flex; justify-content: space-between; align-items: center;">
+                <span>学習データの保存と復元</span>
+                <div>
+                    <button class="io-btn" onclick="exportData()">保存</button>
+                    <button class="io-btn" style="background:var(--success)" onclick="importData()">復元</button>
                 </div>
             </div>
-            <textarea id="importArea" oninput="updateDashboard()" placeholder="保存用データを貼り付けて「復元」"></textarea>
+            <textarea id="importArea" placeholder="ここに保存用データを貼り付けて「復元」を押してください"></textarea>
         </div>
 
-        <div class="range-box">
-            <div class="label">修行範囲と出題数</div>
-            <div class="param-grid">
-                <div class="input-group">
-                    <span>開始ID</span>
-                    <div class="adj-container"><button class="adj-btn" onclick="adj('rangeStart', -100)">-</button><input type="number" id="rangeStart" value="1"><button class="adj-btn" onclick="adj('rangeStart', 100)">+</button></div>
-                </div>
-                <div class="input-group">
-                    <span>終了ID</span>
-                    <div class="adj-container"><button class="adj-btn" onclick="adj('rangeEnd', -100)">-</button><input type="number" id="rangeEnd" value="100"><button class="adj-btn" onclick="adj('rangeEnd', 100)">+</button></div>
-                </div>
-            </div>
-            <div class="input-group" style="background: rgba(255,255,255,0.05); margin-top:8px;">
-                <span>今回の修行数</span>
-                <div class="adj-container"><button class="adj-btn" onclick="adj('testLimit', -10)">-10</button><input type="number" id="testLimit" value="20"><button class="adj-btn" onclick="adj('testLimit', 10)">+10</button></div>
+        <div class="input-group">
+            <span>修行の範囲設定</span>
+            <div class="adj-container">
+                <button class="adj-btn" onclick="adj('rangeStart', -100)">-</button>
+                <input type="number" id="rangeStart" value="1">
+                <span>から</span>
+                <input type="number" id="rangeEnd" value="1462">
+                <button class="adj-btn" onclick="adj('rangeEnd', 100)">+</button>
             </div>
         </div>
 
-        <div class="label">テンポ設定</div>
-        <div class="param-grid">
-            <div class="input-group"><span>解答猶予(秒)</span><input type="number" id="limitTime" value="2.0" step="0.1"></div>
-            <div class="input-group"><span>自動読み上げ</span><input type="checkbox" id="voiceToggle" checked></div>
+        <div class="input-group">
+            <span>一回の修行数と制限時間</span>
+            <div class="adj-container" style="justify-content: space-around;">
+                <div style="text-align:center">
+                    <input type="number" id="testLimit" value="20" style="font-size:28px">
+                    <div class="lg-label">語</div>
+                </div>
+                <div style="text-align:center">
+                    <input type="number" id="limitTime" value="2.5" step="0.1" style="font-size:28px">
+                    <div class="lg-label">秒</div>
+                </div>
+            </div>
         </div>
 
-        <button class="main-btn" onclick="startTraining()">修行開始</button>
+        <button class="main-btn" onclick="startTraining()">修行を開始する</button>
     </div>
 </div>
 
 <div id="app">
-    <div id="infoText" style="text-align:center; font-size:11px; color:var(--gray); margin-bottom:4px; font-weight:bold;"></div>
+    <div id="infoText" style="text-align:center; font-size:12px; color:var(--gray); margin-bottom:8px; font-weight:bold; letter-spacing: 1px;"></div>
     <div class="progress-container"><div id="progressBar"></div></div>
     <div id="card">
-        <div id="itemBadge">NEW</div>
+        <div id="itemBadge"></div>
         <div id="questionText"></div>
         <div id="answerText"></div>
         <div id="timerTrack"><div id="timerBar"></div></div>
@@ -165,23 +158,23 @@
         <button id="correctBtn" class="ans-btn" onclick="processAnswer(true)">わかる (Z)</button>
     </div>
     <div style="text-align:center;">
-        <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:11px; font-weight:bold; cursor:pointer;">中断 (Space)</button>
+        <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:12px; font-weight:bold; cursor:pointer; text-decoration: underline;">修行を中断する (Space)</button>
     </div>
 </div>
 
 <div id="report">
-    <div class="container" style="text-align:center;">
-        <h1>修行完了</h1>
-        <div id="resultScore" style="font-size:32px; font-weight:900; color:var(--success); margin-bottom:20px;"></div>
-        <textarea id="numericalArea" style="height:70px;" readonly></textarea>
-        <button class="main-btn" onclick="location.reload()" style="margin-top:25px; background:var(--gray); color:white;">トップへ戻る</button>
+    <div class="container" style="text-align:center; padding: 40px 20px;">
+        <h1 id="reportGreeting">お疲れ様でした</h1>
+        <div style="font-size:14px; color:var(--gray); margin-bottom:10px;">今回の正解数</div>
+        <div id="resultScore" style="font-size:54px; font-weight:900; color:var(--gold); margin-bottom:30px;"></div>
+        <div style="font-size:12px; color:var(--gray); margin-bottom:10px;">現在の学習進捗コード</div>
+        <textarea id="numericalArea" style="height:80px; text-align:center;" readonly></textarea>
+        <button class="main-btn" onclick="location.reload()" style="background:var(--gray); color:white; margin-top:30px;">トップ画面に戻る</button>
     </div>
 </div>
 
 <script>
-const APP_TITLE = "金の英単語 修行";
-const STORAGE_KEY = 'gold_phrase_mastery';
-
+const STORAGE_KEY = 'gold_phrase_v2_data';
 let ITEMS = [];
 let mastery = {};
 let queue = [];
@@ -198,32 +191,34 @@ function playSound(type) {
     gain.connect(audioCtx.destination);
     osc.type = type === 'correct' ? 'sine' : 'square';
     osc.frequency.setValueAtTime(type === 'correct' ? 880 : 220, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15);
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.2);
+    osc.stop(audioCtx.currentTime + 0.15);
 }
 
 function loadData() {
-    const raw = document.getElementById('raw-data').textContent.trim();
-    ITEMS = raw.split('\n').filter(l => l.includes(',')).map((line, idx) => {
-        const parts = line.split(',');
-        return { 
-            id: idx + 1, 
-            q: parts[0].trim(), 
-            a: parts[1].trim(),
-            context: parts[2] ? parts[2].trim() : ""
-        };
-    });
-    document.getElementById('rangeEnd').value = ITEMS.length;
-    document.getElementById('titleLabel').textContent = APP_TITLE;
+    const raw = document.getElementById('csv-data').textContent.trim();
+    ITEMS = raw.split('\n').map((line, idx) => {
+        const commaIndex = line.indexOf(',');
+        const lastDigitMatch = line.match(/\d+$/);
+        
+        if (commaIndex === -1 || !lastDigitMatch) return null;
+
+        const q = line.substring(0, commaIndex).trim();
+        const aFull = line.substring(commaIndex + 1, lastDigitMatch.index).trim();
+        const id = parseInt(lastDigitMatch[0]);
+
+        return { id, q, a: aFull };
+    }).filter(item => item !== null);
 }
 
 function updateDashboard() {
-    const total = ITEMS.length || 1;
+    const total = ITEMS.length || 1462;
     const counts = { a: 0, b: 0, c: 0, new: 0 };
     Object.values(mastery).forEach(v => { if(counts[v] !== undefined) counts[v]++; });
     counts.new = Math.max(0, total - (counts.a + counts.b + counts.c));
+    
     ['a', 'b', 'c', 'new'].forEach(k => {
         const val = counts[k];
         const pct = (val / total * 100).toFixed(1);
@@ -232,12 +227,11 @@ function updateDashboard() {
     });
 }
 
-function speak(txt, lang) {
-    if (!document.getElementById('voiceToggle').checked) return;
+function speak(txt, lang, rate = 1.0) {
     window.speechSynthesis.cancel();
     const ut = new SpeechSynthesisUtterance(txt);
     ut.lang = lang;
-    ut.rate = 1.0;
+    ut.rate = rate;
     window.speechSynthesis.speak(ut);
 }
 
@@ -247,7 +241,7 @@ function startTraining() {
     const limit = parseInt(document.getElementById('testLimit').value);
     
     let available = ITEMS.filter(item => item.id >= start && item.id <= end);
-    if (available.length === 0) return alert("範囲内にデータがありません");
+    if (available.length === 0) return alert("指定された範囲に単語が見つかりませんでした");
 
     available.sort(() => Math.random() - 0.5);
     queue = available.slice(0, limit);
@@ -269,28 +263,28 @@ function nextItem() {
     if (queue.length === 0) return finishTraining();
     activeItem = queue.shift();
     
-    document.getElementById("infoText").textContent = `ID:${activeItem.id} | ${results.length+1} / ${results.length + queue.length + 1}`;
+    document.getElementById("infoText").textContent = `ID: ${activeItem.id} ／ 残り ${queue.length + 1} 語`;
     document.getElementById("progressBar").style.width = `${(results.length / (results.length + queue.length + 1)) * 100}%`;
     
     const status = mastery[activeItem.id];
     const badge = document.getElementById("itemBadge");
-    badge.textContent = status ? `STATUS: ${status.toUpperCase()}` : "NEW ITEM";
-    badge.style.color = status === 'c' ? "var(--danger)" : (status === 'b' ? "var(--accent)" : (status === 'a' ? "var(--gold)" : "var(--silver)"));
+    badge.textContent = status === 'a' ? "MASTERED" : (status === 'b' ? "LEARNING" : (status === 'c' ? "REVIEW" : "UNTOUCHED"));
+    badge.style.color = status === 'c' ? "var(--danger)" : (status === 'b' ? "var(--accent)" : (status === 'a' ? "var(--gold)" : "var(--gray)"));
 
     document.getElementById("questionText").textContent = activeItem.q;
-    document.getElementById("answerText").innerHTML = `${activeItem.a}<br><small style="color:var(--gray); font-size:0.6em;">${activeItem.context}</small>`;
+    document.getElementById("answerText").textContent = activeItem.a;
     
-    speak(activeItem.q, 'en-US');
+    speak(activeItem.q, 'en-US', 0.9);
     
     setTimeout(() => {
         document.getElementById("answerText").classList.add('visible');
-        speak(activeItem.a, 'ja-JP');
+        speak(activeItem.a, 'ja-JP', 1.1);
         startStressTimer();
-    }, 1000);
+    }, 1200);
 }
 
 function startStressTimer() {
-    const sec = parseFloat(document.getElementById('limitTime').value) || 2.0;
+    const sec = parseFloat(document.getElementById('limitTime').value) || 2.5;
     const track = document.getElementById("timerTrack");
     const bar = document.getElementById("timerBar");
     track.classList.add('active');
@@ -319,7 +313,18 @@ function finishTraining() {
     document.getElementById("app").classList.remove('active');
     document.getElementById("report").classList.add('active');
     const okCount = results.filter(r => r.ok).length;
-    document.getElementById("resultScore").textContent = `${okCount} / ${results.length}`;
+    const total = results.length;
+    document.getElementById("resultScore").textContent = `${okCount} / ${total}`;
+    
+    const greeting = document.getElementById("reportGreeting");
+    if (total > 0 && okCount / total === 1) {
+        greeting.textContent = "完璧な修行でしたね";
+    } else if (okCount / total >= 0.8) {
+        greeting.textContent = "その調子で続けましょう";
+    } else {
+        greeting.textContent = "一歩ずつ着実に進みましょう";
+    }
+    
     document.getElementById("numericalArea").value = Object.keys(mastery).map(id=>`${id}${mastery[id]}`).join(',');
 }
 
@@ -332,7 +337,7 @@ function adj(id, delta) {
 function exportData() {
     const s = Object.keys(mastery).map(id=>`${id}${mastery[id]}`).join(',');
     document.getElementById('importArea').value = s;
-    navigator.clipboard.writeText(s).then(() => alert("進捗をコピーしました"));
+    navigator.clipboard.writeText(s).then(() => alert("進捗コードをクリップボードにコピーしました"));
 }
 
 function importData() {
@@ -345,30 +350,26 @@ function importData() {
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(mastery));
     updateDashboard();
-    alert("進捗を復元しました");
+    alert("学習データを正常に復元しました");
 }
 
 window.onload = () => {
     loadData();
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-        try {
-            mastery = JSON.parse(saved);
-        } catch(e) {
-            mastery = {};
-        }
+        try { mastery = JSON.parse(saved); } catch(e) { mastery = {}; }
     }
     updateDashboard();
 };
 
 document.onkeydown = (e) => {
     if (!document.getElementById("app").classList.contains('active')) return;
-    if (e.key.toLowerCase() === 'z') processAnswer(true);
-    if (e.key.toLowerCase() === 'a') processAnswer(false);
+    const key = e.key.toLowerCase();
+    if (key === 'z') processAnswer(true);
+    if (key === 'a') processAnswer(false);
     if (e.code === 'Space') { e.preventDefault(); finishTraining(); }
 };
 </script>
-
 
 <script type="text/plain" id="csv-data">
 Let's try anyway,とにかくやってみよう1
@@ -1351,7 +1352,7 @@ deplete the budget,予算を使い果たす977
 the proprietor of a clothing shop,衣料品店の店主978
 copyright infringement,著作権侵害979
 We will waive the shipping charge.,送料は免除します980
-alleviate traffic congestion,交通渋滞を緩和する981
+alleviate traffic congestion,交通渋渋滞を緩和する981
 an avid reader,熱心な読書家982
 a gala dinner,祝賀晩餐会983
 a stagnant market,停滞した市場984
@@ -1725,7 +1726,7 @@ Tex managed to pay for the trip.,テックスは何とか旅行代を払えた13
 manage a store,店を経営する1352
 Look at the picture marked number 1.,1番と記された絵を見なさい1353
 Today marks our 10th anniversary.,今日は私たちの10周年に当たる1354
-miss the mark,的を外す1355
+miss the mark,的な外す1355
 Tex has already made his mark.,テックスはすでに名を成している1356
 Few companies can match our quality service.,当社ほど質の高いサービスを提供できる会社はほとんどない1357
 match a price,価格を合わせる1358
@@ -1754,7 +1755,7 @@ Some people are planting trees.,何人かの人が木を植えている1380
 post office,郵便局1381
 post changes on a bulletin board,変更点を掲示板に掲示する1382
 post comments on the Internet,インターネットにコメントを投稿する1383
-Tex was posted to Moscow.,テックスはモスクワに赴任した1384
+Tex was posted to Moscow.,テックスは本務地に赴任した1384
 common business practice,一般的な商習慣1385
 a doctor who practices in Australia,オーストラリアで開業している医師1386
 practice a unique method,独自の方法を実践する1387
@@ -1765,7 +1766,7 @@ All members present agreed.,出席者全員が賛成した1391
 the present address,現在の住所1392
 All our products are produced locally.,当社の製品はすべて地元で生産されている1393
 the produce section of a supermarket,スーパーの青果売り場1394
-professional advice,専門付助言1395
+professional advice,専門的な助言1395
 professional achievements,職業上の業績1396
 professional behavior,職業人としての態度1397
 project that sales will increase by 10%,売上が10パーセント増えると予測する1398
