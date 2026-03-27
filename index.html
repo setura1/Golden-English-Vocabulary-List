@@ -3,82 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover">
-    <title>Golden Training 1462</title>
+    <title>金の英単語：修行システム</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         :root {
-            --bg: #0a0c10;
-            --container: #161b22;
-            --card-bg: #21262d;
-            --text: #c9d1d9;
-            --primary: #58a6ff;
-            --success: #238636;
-            --danger: #da3633;
-            --gray: #8b949e;
-            --accent: #bc8cff;
-            --gold: #d29922;
+            --bg: #030712;
+            --container: #111827;
+            --card-bg: #1f2937;
+            --text: #f9fafb;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --gray: #6b7280;
+            --accent: #8b5cf6;
+            --gold: #fbbf24;
+            --silver: #94a3b8;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         html, body { 
             margin: 0; width: 100%; height: 100%; background: var(--bg); 
-            font-family: 'Inter', -apple-system, system-ui, sans-serif; color: var(--text); 
-            overflow: hidden; touch-action: manipulation;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; color: var(--text); 
+            overflow-x: hidden; touch-action: manipulation;
         }
         
-        #setup, #report { padding: 24px; min-height: 100vh; overflow-y: auto; display: none; }
+        #setup, #report { padding: 20px; min-height: 100vh; overflow-y: auto; display: none; }
         #setup.active, #report.active { display: block; }
-        #app { display: none; position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 16px; z-index: 100; }
+        #app { display: none; position: fixed; inset: 0; background: var(--bg); flex-direction: column; padding: 12px; z-index: 100; }
         #app.active { display: flex; }
 
-        .container { max-width: 500px; margin: 0 auto; background: var(--container); border-radius: 32px; padding: 28px; border: 1px solid #30363d; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        h1 { font-size: 18px; text-align: center; margin: 0 0 20px 0; color: var(--gold); font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+        .container { max-width: 650px; margin: 0 auto; background: var(--container); border-radius: 28px; padding: 20px; border: 1px solid #374151; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        h1 { font-size: 24px; text-align: center; margin: 0 0 15px 0; color: var(--gold); font-weight: 900; letter-spacing: 1px; }
 
-        .dashboard { background: rgba(0,0,0,0.2); border-radius: 20px; padding: 16px; margin-bottom: 24px; border: 1px solid #30363d; }
-        .db-bar { height: 10px; display: flex; border-radius: 5px; overflow: hidden; background: #010409; margin-bottom: 12px; }
-        .db-seg { height: 100%; transition: width 0.8s ease; }
+        .dashboard { background: rgba(31, 41, 55, 0.5); border-radius: 24px; padding: 18px; margin-bottom: 20px; border: 1px solid #374151; }
+        .db-bar { height: 14px; display: flex; border-radius: 7px; overflow: hidden; background: #030712; margin-bottom: 12px; }
+        .db-seg { height: 100%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         .seg-a { background: var(--gold); }
         .seg-b { background: var(--accent); }
         .seg-c { background: var(--danger); }
-        .seg-new { background: #484f58; }
-        .db-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
-        .lg-val { font-size: 11px; font-weight: 800; display: block; text-align: center; }
+        .seg-new { background: #4b5563; }
+        .db-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .lg-item { text-align: center; }
+        .lg-label { font-size: 10px; color: var(--gray); display: block; margin-bottom: 2px; }
+        .lg-val { font-size: 12px; font-weight: 900; }
 
-        .label { font-size: 10px; font-weight: 800; color: var(--gray); margin: 16px 0 6px 4px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
-        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .input-group { background: var(--card-bg); padding: 12px; border-radius: 16px; border: 1px solid #30363d; }
-        .input-group span { font-size: 9px; color: var(--gray); display: block; margin-bottom: 4px; font-weight: bold; }
-        .adj-container { display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .adj-btn { background: #30363d; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
-        input { width: 60px; background: transparent; border: none; color: white; font-size: 18px; font-weight: 900; text-align: center; }
+        .label { font-size: 11px; font-weight: 800; color: var(--silver); margin: 16px 0 6px 4px; display: flex; justify-content: space-between; align-items: center; }
+        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+        @media (max-width: 420px) { .param-grid { grid-template-columns: 1fr; } }
 
-        textarea { width: 100%; height: 50px; background: #010409; color: var(--text); border: 1px solid #30363d; border-radius: 12px; padding: 10px; font-size: 11px; margin-top: 4px; outline: none; resize: none; }
-
-        button.main-btn { width: 100%; height: 60px; border: none; border-radius: 20px; font-size: 20px; font-weight: 900; cursor: pointer; background: var(--primary); color: #0a0c10; transition: 0.2s; margin-top: 20px; }
-        .copy-tag { background: #30363d; color: var(--primary); border: none; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
-
-        #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; background: var(--card-bg); border-radius: 40px; margin: 10px 0; position: relative; border: 1px solid #30363d; box-shadow: inset 0 0 40px rgba(0,0,0,0.2); }
-        #itemBadge { position: absolute; top: 24px; font-size: 16px; font-weight: 900; padding: 2px 14px; border-radius: 10px; border: 2px solid currentColor; }
-        #qText { font-size: 32px; font-weight: 900; line-height: 1.2; color: #fff; margin-bottom: 10px; }
-        #aText { font-size: 22px; color: var(--primary); font-weight: 800; opacity: 0; transform: translateY(10px); transition: 0.3s; }
-        #aText.visible { opacity: 1; transform: translateY(0); }
+        .input-group { background: #1f2937; padding: 12px; border-radius: 18px; border: 1px solid #374151; }
+        .input-group span { font-size: 10px; margin-bottom: 6px; color: #9ca3af; display: block; font-weight: bold; }
         
-        #timerTrack { width: 80%; height: 4px; background: #010409; margin-top: 40px; border-radius: 2px; overflow: hidden; opacity: 0; }
+        .adj-container { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .adj-btn { background: #334155; color: white; border: none; padding: 10px 14px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; min-width: 44px; }
+        .adj-btn:active { transform: scale(0.9); background: var(--primary); }
+
+        input { width: 75px; background: transparent; border: none; color: white; font-size: 20px; font-weight: 900; text-align: center; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .range-box { background: linear-gradient(145deg, #451a03, #111827); padding: 18px; border-radius: 24px; border: 1px solid var(--gold); margin-bottom: 18px; }
+        textarea { width: 100%; height: 55px; background: rgba(0,0,0,0.4); color: #94a3b8; border: 1px solid #374151; border-radius: 14px; padding: 12px; font-size: 12px; margin-top: 6px; outline: none; resize: none; word-break: break-all; }
+
+        button.main-btn { width: 100%; height: 64px; border: none; border-radius: 22px; font-size: 22px; font-weight: 900; cursor: pointer; background: var(--gold); color: #000; transition: 0.2s; box-shadow: 0 12px 24px -6px rgba(251, 191, 36, 0.4); }
+        button.main-btn:active { transform: scale(0.97); }
+
+        .sm-btn { background: #374151; color: white; border: none; padding: 7px 14px; border-radius: 10px; font-size: 11px; cursor: pointer; font-weight: 800; }
+        .io-btn { background: var(--accent); color: white; border: none; padding: 7px 14px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; }
+        
+        #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 25px; gap: 10px; background: var(--card-bg); border-radius: 48px; margin: 10px 0; position: relative; border: 1px solid #374151; box-shadow: inset 0 0 40px rgba(0,0,0,0.4); }
+        #itemBadge { position: absolute; top: 30px; font-size: 14px; font-weight: 900; padding: 4px 18px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 2px solid currentColor; }
+        
+        #questionText { font-size: 48px; font-weight: 900; line-height: 1.1; color: var(--text); word-break: break-all; max-width: 95%; margin-top: 30px; }
+        #answerText { font-size: 28px; color: var(--gold); font-weight: 800; visibility: hidden; min-height: 1.5em; margin-top: 15px; }
+        #answerText.visible { visibility: visible; }
+        
+        #timerTrack { width: 100%; height: 10px; background: #030712; margin-top: 25px; border-radius: 10px; overflow: hidden; opacity: 0; }
         #timerTrack.active { opacity: 1; }
         #timerBar { height: 100%; background: var(--danger); width: 0%; }
 
-        .progress-container { width: 100%; height: 4px; background: #30363d; border-radius: 2px; overflow: hidden; margin-bottom: 10px; }
-        #progressBar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s linear; }
+        .progress-container { width: 100%; height: 8px; background: #1f2937; border-radius: 10px; overflow: hidden; margin: 8px 0; }
+        #progressBar { height: 100%; background: var(--gold); width: 0%; transition: width 0.3s linear; }
         
-        .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; padding-bottom: 10px; }
-        .ans-btn { height: 100px; border: none; border-radius: 30px; color: #fff; font-size: 24px; font-weight: 900; cursor: pointer; box-shadow: 0 8px 15px rgba(0,0,0,0.3); }
-        #wrongBtn { background: var(--danger); }
+        .ans-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; margin-bottom: 12px; }
+        .ans-btn { height: 90px; border: none; border-radius: 32px; color: white; font-size: 26px; font-weight: 900; cursor: pointer; transition: 0.15s; }
+        .ans-btn:active { transform: scale(0.94); }
         #correctBtn { background: var(--success); }
+        #wrongBtn { background: var(--danger); }
     </style>
 </head>
 <body>
 
 <div id="setup" class="active">
     <div class="container">
-        <h1>Golden Training 1462</h1>
+        <h1 id="titleLabel">金の英単語 修行</h1>
 
         <div class="dashboard">
             <div class="db-bar">
@@ -88,75 +105,83 @@
                 <div id="bar-new" class="db-seg seg-new"></div>
             </div>
             <div class="db-legend">
-                <span id="val-a" class="lg-val" style="color:var(--gold)">0</span>
-                <span id="val-b" class="lg-val" style="color:var(--accent)">0</span>
-                <span id="val-c" class="lg-val" style="color:var(--danger)">0</span>
-                <span id="val-new" class="lg-val" style="color:var(--gray)">0</span>
+                <div class="lg-item"><span class="lg-label">習得(a)</span><span id="val-a" class="lg-val" style="color:var(--gold)">0</span></div>
+                <div class="lg-item"><span class="lg-label">継続(b)</span><span id="val-b" class="lg-val" style="color:var(--accent)">0</span></div>
+                <div class="lg-item"><span class="lg-label">苦手(c)</span><span id="val-c" class="lg-val" style="color:var(--danger)">0</span></div>
+                <div class="lg-item"><span class="lg-label">未着手</span><span id="val-new" class="lg-val" style="color:var(--silver)">0</span></div>
             </div>
         </div>
-
-        <div class="input-group" style="background: rgba(88,166,255,0.05);">
-            <div class="label" style="margin-top:0">DATA SYNC <button class="copy-tag" onclick="exportData(this)">COPY</button></div>
-            <textarea id="importArea" oninput="updateDashboard()" placeholder="進捗データを貼り付けて復元"></textarea>
+        
+        <div class="input-group" style="margin-bottom:15px; background: #1e1b4b;">
+            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:6px;">
+                <span style="color:#fff">進捗復元 / 書き出し</span>
+                <div style="display:flex; gap:6px;">
+                    <button class="io-btn" style="background: var(--success);" onclick="importData()">復元</button>
+                    <button class="io-btn" onclick="exportData()">出す</button>
+                </div>
+            </div>
+            <textarea id="importArea" oninput="updateDashboard()" placeholder="保存用データを貼り付けて「復元」"></textarea>
         </div>
 
-        <div class="label">RANGE / LIMIT</div>
         <div class="range-box">
+            <div class="label">修行範囲と出題数</div>
             <div class="param-grid">
                 <div class="input-group">
-                    <span>START ID</span>
+                    <span>開始ID</span>
                     <div class="adj-container"><button class="adj-btn" onclick="adj('rangeStart', -100)">-</button><input type="number" id="rangeStart" value="1"><button class="adj-btn" onclick="adj('rangeStart', 100)">+</button></div>
                 </div>
                 <div class="input-group">
-                    <span>END ID</span>
-                    <div class="adj-container"><button class="adj-btn" onclick="adj('rangeEnd', -100)">-</button><input type="number" id="rangeEnd" value="1462"><button class="adj-btn" onclick="adj('rangeEnd', 100)">+</button></div>
+                    <span>終了ID</span>
+                    <div class="adj-container"><button class="adj-btn" onclick="adj('rangeEnd', -100)">-</button><input type="number" id="rangeEnd" value="100"><button class="adj-btn" onclick="adj('rangeEnd', 100)">+</button></div>
                 </div>
             </div>
-            <div class="input-group" style="margin-top:10px;">
-                <span>QUESTIONS</span>
-                <div class="adj-container"><button class="adj-btn" onclick="adj('testLimit', -50)">-50</button><input type="number" id="testLimit" value="100"><button class="adj-btn" onclick="adj('testLimit', 50)">+50</button></div>
+            <div class="input-group" style="background: rgba(255,255,255,0.05); margin-top:8px;">
+                <span>今回の修行数</span>
+                <div class="adj-container"><button class="adj-btn" onclick="adj('testLimit', -10)">-10</button><input type="number" id="testLimit" value="20"><button class="adj-btn" onclick="adj('testLimit', 10)">+10</button></div>
             </div>
         </div>
 
-        <div class="label">CONFIG</div>
+        <div class="label">テンポ設定</div>
         <div class="param-grid">
-            <div class="input-group"><span>VOICE</span><input type="checkbox" id="voiceToggle" checked></div>
-            <div class="input-group"><span>LIMIT(S)</span><input type="number" id="limitTime" value="1.0" step="0.1"></div>
+            <div class="input-group"><span>解答猶予(秒)</span><input type="number" id="limitTime" value="2.0" step="0.1"></div>
+            <div class="input-group"><span>自動読み上げ</span><input type="checkbox" id="voiceToggle" checked></div>
         </div>
 
-        <button class="main-btn" onclick="startTraining()">START TRAINING</button>
+        <button class="main-btn" onclick="startTraining()">修行開始</button>
     </div>
 </div>
 
 <div id="app">
-    <div id="infoText" style="text-align:right; font-size:10px; color:var(--gray); margin-bottom:4px;"></div>
+    <div id="infoText" style="text-align:center; font-size:11px; color:var(--gray); margin-bottom:4px; font-weight:bold;"></div>
     <div class="progress-container"><div id="progressBar"></div></div>
     <div id="card">
         <div id="itemBadge">NEW</div>
-        <div id="qText"></div>
-        <div id="aText"></div>
+        <div id="questionText"></div>
+        <div id="answerText"></div>
         <div id="timerTrack"><div id="timerBar"></div></div>
     </div>
     <div class="ans-btns">
-        <button id="wrongBtn" class="ans-btn" onclick="processAnswer(false)">苦手 A</button>
-        <button id="correctBtn" class="ans-btn" onclick="processAnswer(true)">正解 Z</button>
+        <button id="wrongBtn" class="ans-btn" onclick="processAnswer(false)">苦手 (A)</button>
+        <button id="correctBtn" class="ans-btn" onclick="processAnswer(true)">わかる (Z)</button>
     </div>
     <div style="text-align:center;">
-        <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:10px; cursor:pointer; font-weight:bold;">EXIT (SPACE)</button>
+        <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:11px; font-weight:bold; cursor:pointer;">中断 (Space)</button>
     </div>
 </div>
 
 <div id="report">
     <div class="container" style="text-align:center;">
-        <h1 style="color:var(--success)">COMPLETE</h1>
-        <div id="resultScore" style="font-size:36px; font-weight:900; margin-bottom:24px;"></div>
-        <textarea id="numericalArea" style="height:80px;" readonly></textarea>
-        <button class="main-btn" onclick="location.reload()" style="background:var(--gray); color:#000">HOME</button>
+        <h1>修行完了</h1>
+        <div id="resultScore" style="font-size:32px; font-weight:900; color:var(--success); margin-bottom:20px;"></div>
+        <textarea id="numericalArea" style="height:70px;" readonly></textarea>
+        <button class="main-btn" onclick="location.reload()" style="margin-top:25px; background:var(--gray); color:white;">トップへ戻る</button>
     </div>
 </div>
 
 <script>
-const STORAGE_KEY = 'gold_mastery_v1462';
+const APP_TITLE = "金の英単語 修行";
+const STORAGE_KEY = 'gold_phrase_mastery';
+
 let ITEMS = [];
 let mastery = {};
 let queue = [];
@@ -165,63 +190,65 @@ let activeItem = null;
 let stressTimer = null;
 let audioCtx = null;
 
-function playSound(isCorrect) {
+function playSound(type) {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.type = isCorrect ? 'sine' : 'square';
-    osc.frequency.setValueAtTime(isCorrect ? 880 : 220, audioCtx.currentTime);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = type === 'correct' ? 'sine' : 'square';
+    osc.frequency.setValueAtTime(type === 'correct' ? 880 : 220, audioCtx.currentTime);
     gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
     gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.2);
 }
 
 function loadData() {
     const raw = document.getElementById('raw-data').textContent.trim();
     ITEMS = raw.split('\n').filter(l => l.includes(',')).map((line, idx) => {
         const parts = line.split(',');
-        return { id: idx + 1, q: parts[0].trim(), a: parts[1].trim() };
+        return { 
+            id: idx + 1, 
+            q: parts[0].trim(), 
+            a: parts[1].trim(),
+            context: parts[2] ? parts[2].trim() : ""
+        };
     });
+    document.getElementById('rangeEnd').value = ITEMS.length;
+    document.getElementById('titleLabel').textContent = APP_TITLE;
 }
 
 function updateDashboard() {
-    const impTxt = document.getElementById('importArea').value.trim();
-    if (impTxt) {
-        impTxt.split(',').forEach(t => {
-            const m = t.match(/(\d+)([abc])/);
-            if (m) mastery[parseInt(m[1])] = m[2];
-        });
-    }
+    const total = ITEMS.length || 1;
     const counts = { a: 0, b: 0, c: 0, new: 0 };
-    Object.values(mastery).forEach(v => counts[v]++);
-    counts.new = Math.max(0, ITEMS.length - (counts.a + counts.b + counts.c));
+    Object.values(mastery).forEach(v => { if(counts[v] !== undefined) counts[v]++; });
+    counts.new = Math.max(0, total - (counts.a + counts.b + counts.c));
     ['a', 'b', 'c', 'new'].forEach(k => {
         const val = counts[k];
-        const pct = (val / ITEMS.length * 100 || 0).toFixed(1);
-        const bar = document.getElementById(`bar-${k}`);
-        if (bar) bar.style.width = pct + '%';
-        const display = document.getElementById(`val-${k}`);
-        if (display) display.textContent = val;
+        const pct = (val / total * 100).toFixed(1);
+        document.getElementById(`bar-${k}`).style.width = pct + '%';
+        document.getElementById(`val-${k}`).textContent = `${val} (${pct}%)`;
     });
 }
 
-function speak(txt) {
+function speak(txt, lang) {
     if (!document.getElementById('voiceToggle').checked) return;
     window.speechSynthesis.cancel();
     const ut = new SpeechSynthesisUtterance(txt);
-    ut.lang = 'en-US';
-    ut.rate = 1.4;
+    ut.lang = lang;
+    ut.rate = 1.0;
     window.speechSynthesis.speak(ut);
 }
 
 function startTraining() {
-    loadData();
     const start = parseInt(document.getElementById('rangeStart').value);
     const end = parseInt(document.getElementById('rangeEnd').value);
     const limit = parseInt(document.getElementById('testLimit').value);
-    let available = ITEMS.filter(i => i.id >= start && i.id <= end);
-    if (available.length === 0) return alert("NO DATA");
+    
+    let available = ITEMS.filter(item => item.id >= start && item.id <= end);
+    if (available.length === 0) return alert("範囲内にデータがありません");
+
     available.sort(() => Math.random() - 0.5);
     queue = available.slice(0, limit);
     results = [];
@@ -232,42 +259,57 @@ function startTraining() {
 
 function nextItem() {
     clearTimeout(stressTimer);
-    document.getElementById("timerTrack").classList.remove('active');
-    document.getElementById("timerBar").style.width = "0%";
-    document.getElementById("aText").classList.remove('visible');
+    const track = document.getElementById("timerTrack");
+    const bar = document.getElementById("timerBar");
+    track.classList.remove('active');
+    bar.style.transition = "none";
+    bar.style.width = "0%";
+    document.getElementById("answerText").classList.remove('visible');
+    
     if (queue.length === 0) return finishTraining();
     activeItem = queue.shift();
-    document.getElementById("infoText").textContent = `${results.length + 1} / ${results.length + queue.length + 1}`;
+    
+    document.getElementById("infoText").textContent = `ID:${activeItem.id} | ${results.length+1} / ${results.length + queue.length + 1}`;
     document.getElementById("progressBar").style.width = `${(results.length / (results.length + queue.length + 1)) * 100}%`;
+    
     const status = mastery[activeItem.id];
     const badge = document.getElementById("itemBadge");
-    badge.textContent = status ? status.toUpperCase() : "NEW";
-    badge.style.color = status === 'c' ? "var(--danger)" : (status === 'b' ? "var(--accent)" : (status === 'a' ? "var(--gold)" : "var(--gray)"));
-    document.getElementById("qText").textContent = activeItem.q;
-    document.getElementById("aText").textContent = activeItem.a;
-    speak(activeItem.q);
+    badge.textContent = status ? `STATUS: ${status.toUpperCase()}` : "NEW ITEM";
+    badge.style.color = status === 'c' ? "var(--danger)" : (status === 'b' ? "var(--accent)" : (status === 'a' ? "var(--gold)" : "var(--silver)"));
+
+    document.getElementById("questionText").textContent = activeItem.q;
+    document.getElementById("answerText").innerHTML = `${activeItem.a}<br><small style="color:var(--gray); font-size:0.6em;">${activeItem.context}</small>`;
+    
+    speak(activeItem.q, 'en-US');
+    
     setTimeout(() => {
-        document.getElementById("aText").classList.add('visible');
+        document.getElementById("answerText").classList.add('visible');
+        speak(activeItem.a, 'ja-JP');
         startStressTimer();
-    }, 800);
+    }, 1000);
 }
 
 function startStressTimer() {
-    const sec = parseFloat(document.getElementById('limitTime').value) || 1.0;
+    const sec = parseFloat(document.getElementById('limitTime').value) || 2.0;
+    const track = document.getElementById("timerTrack");
     const bar = document.getElementById("timerBar");
-    document.getElementById("timerTrack").classList.add('active');
+    track.classList.add('active');
     bar.style.transition = `width ${sec}s linear`;
     bar.style.width = "100%";
     stressTimer = setTimeout(() => processAnswer(false), sec * 1000);
 }
 
-function processAnswer(ok) {
+function processAnswer(isOk) {
     clearTimeout(stressTimer);
     if (!activeItem) return;
-    playSound(ok);
+    playSound(isOk ? 'correct' : 'wrong');
     const id = activeItem.id;
-    mastery[id] = ok ? (mastery[id] === 'c' ? 'b' : 'a') : 'c';
-    results.push({ id, ok });
+    if (isOk) {
+        mastery[id] = (mastery[id] === 'c') ? 'b' : 'a';
+    } else {
+        mastery[id] = 'c';
+    }
+    results.push({ ...activeItem, ok: isOk });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(mastery));
     nextItem();
 }
@@ -278,28 +320,44 @@ function finishTraining() {
     document.getElementById("report").classList.add('active');
     const okCount = results.filter(r => r.ok).length;
     document.getElementById("resultScore").textContent = `${okCount} / ${results.length}`;
-    document.getElementById("numericalArea").value = Object.keys(mastery).sort((a,b)=>a-b).map(id=>`${id}${mastery[id]}`).join(',');
+    document.getElementById("numericalArea").value = Object.keys(mastery).map(id=>`${id}${mastery[id]}`).join(',');
 }
 
-function adj(id, d) {
+function adj(id, delta) {
     const el = document.getElementById(id);
-    el.value = Math.max(1, parseInt(el.value) + d);
+    el.value = Math.max(1, parseInt(el.value) + delta);
     updateDashboard();
 }
 
-function exportData(btn) {
-    const s = Object.keys(mastery).sort((a,b)=>a-b).map(id=>`${id}${mastery[id]}`).join(',');
+function exportData() {
+    const s = Object.keys(mastery).map(id=>`${id}${mastery[id]}`).join(',');
     document.getElementById('importArea').value = s;
-    navigator.clipboard.writeText(s).then(() => {
-        const old = btn.textContent; btn.textContent = "SAVED";
-        setTimeout(() => btn.textContent = old, 1000);
+    navigator.clipboard.writeText(s).then(() => alert("進捗をコピーしました"));
+}
+
+function importData() {
+    const txt = document.getElementById('importArea').value.trim();
+    if(!txt) return;
+    mastery = {};
+    txt.split(',').forEach(t => {
+        const m = t.match(/(\d+)([abc])/);
+        if (m) mastery[parseInt(m[1])] = m[2];
     });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mastery));
+    updateDashboard();
+    alert("進捗を復元しました");
 }
 
 window.onload = () => {
     loadData();
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) mastery = JSON.parse(saved);
+    if (saved) {
+        try {
+            mastery = JSON.parse(saved);
+        } catch(e) {
+            mastery = {};
+        }
+    }
     updateDashboard();
 };
 
@@ -310,6 +368,7 @@ document.onkeydown = (e) => {
     if (e.code === 'Space') { e.preventDefault(); finishTraining(); }
 };
 </script>
+
 
 <script type="text/plain" id="csv-data">
 Let's try anyway,とにかくやってみよう1
