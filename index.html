@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover">
-    <title>TOEIC修行 1462 究極版</title>
+    <title>Golden Training 1462</title>
     <style>
         :root {
             --bg: #0a0c10;
@@ -32,7 +32,6 @@
         .container { max-width: 500px; margin: 0 auto; background: var(--container); border-radius: 32px; padding: 28px; border: 1px solid #30363d; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         h1 { font-size: 18px; text-align: center; margin: 0 0 20px 0; color: var(--gold); font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
 
-        /* 進捗表示 */
         .dashboard { background: rgba(0,0,0,0.2); border-radius: 20px; padding: 16px; margin-bottom: 24px; border: 1px solid #30363d; }
         .db-bar { height: 10px; display: flex; border-radius: 5px; overflow: hidden; background: #010409; margin-bottom: 12px; }
         .db-seg { height: 100%; transition: width 0.8s ease; }
@@ -43,7 +42,6 @@
         .db-legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
         .lg-val { font-size: 11px; font-weight: 800; display: block; text-align: center; }
 
-        /* 入力エリア */
         .label { font-size: 10px; font-weight: 800; color: var(--gray); margin: 16px 0 6px 4px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
         .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .input-group { background: var(--card-bg); padding: 12px; border-radius: 16px; border: 1px solid #30363d; }
@@ -57,12 +55,11 @@
         button.main-btn { width: 100%; height: 60px; border: none; border-radius: 20px; font-size: 20px; font-weight: 900; cursor: pointer; background: var(--primary); color: #0a0c10; transition: 0.2s; margin-top: 20px; }
         .copy-tag { background: #30363d; color: var(--primary); border: none; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
 
-        /* 修行コア画面 */
         #card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; background: var(--card-bg); border-radius: 40px; margin: 10px 0; position: relative; border: 1px solid #30363d; box-shadow: inset 0 0 40px rgba(0,0,0,0.2); }
-        #wordBadge { position: absolute; top: 24px; font-size: 16px; font-weight: 900; padding: 2px 14px; border-radius: 10px; border: 2px solid currentColor; }
-        #englishWord { font-size: 28px; font-weight: 900; line-height: 1.3; color: #fff; margin-bottom: 10px; }
-        #japaneseWord { font-size: 20px; color: var(--primary); font-weight: 800; opacity: 0; transform: translateY(10px); transition: 0.3s; }
-        #japaneseWord.visible { opacity: 1; transform: translateY(0); }
+        #itemBadge { position: absolute; top: 24px; font-size: 16px; font-weight: 900; padding: 2px 14px; border-radius: 10px; border: 2px solid currentColor; }
+        #qText { font-size: 32px; font-weight: 900; line-height: 1.2; color: #fff; margin-bottom: 10px; }
+        #aText { font-size: 22px; color: var(--primary); font-weight: 800; opacity: 0; transform: translateY(10px); transition: 0.3s; }
+        #aText.visible { opacity: 1; transform: translateY(0); }
         
         #timerTrack { width: 80%; height: 4px; background: #010409; margin-top: 40px; border-radius: 2px; overflow: hidden; opacity: 0; }
         #timerTrack.active { opacity: 1; }
@@ -99,8 +96,8 @@
         </div>
 
         <div class="input-group" style="background: rgba(88,166,255,0.05);">
-            <div class="label" style="margin-top:0">DATA SYNC <button class="copy-tag" onclick="copyValue('importArea', this)">COPY</button></div>
-            <textarea id="importArea" oninput="updateDashboard()" placeholder="データをペーストして復元"></textarea>
+            <div class="label" style="margin-top:0">DATA SYNC <button class="copy-tag" onclick="exportData(this)">COPY</button></div>
+            <textarea id="importArea" oninput="updateDashboard()" placeholder="進捗データを貼り付けて復元"></textarea>
         </div>
 
         <div class="label">RANGE / LIMIT</div>
@@ -121,9 +118,9 @@
             </div>
         </div>
 
-        <div class="label">TEMPO</div>
+        <div class="label">CONFIG</div>
         <div class="param-grid">
-            <div class="input-group"><span>ENG RATE</span><input type="number" id="rateEn" value="1.4" step="0.1"></div>
+            <div class="input-group"><span>VOICE</span><input type="checkbox" id="voiceToggle" checked></div>
             <div class="input-group"><span>LIMIT(S)</span><input type="number" id="limitTime" value="1.0" step="0.1"></div>
         </div>
 
@@ -132,168 +129,127 @@
 </div>
 
 <div id="app">
-    <div id="infoText" style="text-align:right; font-size:10px; color:var(--gray); letter-spacing:1px; margin-bottom:4px;"></div>
+    <div id="infoText" style="text-align:right; font-size:10px; color:var(--gray); margin-bottom:4px;"></div>
     <div class="progress-container"><div id="progressBar"></div></div>
     <div id="card">
-        <div id="wordBadge">NEW</div>
-        <div id="englishWord"></div>
-        <div id="japaneseWord"></div>
+        <div id="itemBadge">NEW</div>
+        <div id="qText"></div>
+        <div id="aText"></div>
         <div id="timerTrack"><div id="timerBar"></div></div>
     </div>
     <div class="ans-btns">
         <button id="wrongBtn" class="ans-btn" onclick="processAnswer(false)">苦手 A</button>
         <button id="correctBtn" class="ans-btn" onclick="processAnswer(true)">正解 Z</button>
     </div>
-    <div style="display:flex; justify-content: space-between; align-items: center;">
+    <div style="text-align:center;">
         <button onclick="finishTraining()" style="background:none; border:none; color:var(--gray); font-size:10px; cursor:pointer; font-weight:bold;">EXIT (SPACE)</button>
-        <button onclick="quickSaveCopy()" id="midBtn" class="copy-tag">SYNC PROGRESS</button>
     </div>
 </div>
 
 <div id="report">
     <div class="container" style="text-align:center;">
-        <h1 style="color:var(--success)">SESSION COMPLETE</h1>
+        <h1 style="color:var(--success)">COMPLETE</h1>
         <div id="resultScore" style="font-size:36px; font-weight:900; margin-bottom:24px;"></div>
-        
-        <div class="label">MISSED WORDS <button class="copy-tag" onclick="copyValue('wrongListArea', this)">COPY LIST</button></div>
-        <textarea id="wrongListArea" style="height:120px; color:var(--danger);" readonly></textarea>
-        
-        <div class="label">FULL DATA <button class="copy-tag" onclick="copyValue('numericalArea', this)">COPY ALL</button></div>
         <textarea id="numericalArea" style="height:80px;" readonly></textarea>
-        
-        <button class="main-btn" onclick="location.reload()" style="background:var(--gray); color:#000">BACK TO HOME</button>
+        <button class="main-btn" onclick="location.reload()" style="background:var(--gray); color:#000">HOME</button>
     </div>
 </div>
 
 <script>
-let CURRENT_TOTAL = 1462;
-const WORDS = [];
+const STORAGE_KEY = 'gold_mastery_v1462';
+let ITEMS = [];
 let mastery = {};
 let queue = [];
 let results = [];
-let activeWord = null;
+let activeItem = null;
 let stressTimer = null;
-let enVoice = null;
+let audioCtx = null;
 
-function setupVoices() {
-    const fn = () => {
-        const voices = window.speechSynthesis.getVoices();
-        enVoice = voices.find(v => v.lang === 'en-US' && (v.name.includes('Google') || v.name.includes('Enhanced'))) || 
-                  voices.find(v => v.lang === 'en-US') || 
-                  voices.find(v => v.lang.startsWith('en'));
-    };
-    fn();
-    window.speechSynthesis.onvoiceschanged = fn;
+function playSound(isCorrect) {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = isCorrect ? 'sine' : 'square';
+    osc.frequency.setValueAtTime(isCorrect ? 880 : 220, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.2);
 }
 
 function loadData() {
-    const raw = document.getElementById('csv-data').textContent.trim();
-    const lines = raw.split('\n');
-    WORDS.length = 0;
-    lines.forEach((line) => {
+    const raw = document.getElementById('raw-data').textContent.trim();
+    ITEMS = raw.split('\n').filter(l => l.includes(',')).map((line, idx) => {
         const parts = line.split(',');
-        if (parts.length >= 2) {
-            const m = parts[1].trim().match(/^(.*?)(\d+)$/);
-            if (m) {
-                // 表示用：日本語から「～」や「を」を簡易削除
-                let cleanJa = m[1].trim().replace(/^～/, "").replace(/する$/, "");
-                WORDS.push({ id: parseInt(m[2]), en: parts[0].trim(), ja: cleanJa, raw: line });
-            }
-        }
+        return { id: idx + 1, q: parts[0].trim(), a: parts[1].trim() };
     });
-    CURRENT_TOTAL = WORDS.length;
 }
 
 function updateDashboard() {
     const impTxt = document.getElementById('importArea').value.trim();
-    const tempMastery = {...mastery};
     if (impTxt) {
         impTxt.split(',').forEach(t => {
             const m = t.match(/(\d+)([abc])/);
-            if (m) tempMastery[parseInt(m[1])] = m[2];
+            if (m) mastery[parseInt(m[1])] = m[2];
         });
     }
     const counts = { a: 0, b: 0, c: 0, new: 0 };
-    Object.values(tempMastery).forEach(v => counts[v]++);
-    counts.new = Math.max(0, CURRENT_TOTAL - (counts.a + counts.b + counts.c));
-
+    Object.values(mastery).forEach(v => counts[v]++);
+    counts.new = Math.max(0, ITEMS.length - (counts.a + counts.b + counts.c));
     ['a', 'b', 'c', 'new'].forEach(k => {
-        const pct = (counts[k] / CURRENT_TOTAL * 100).toFixed(1);
+        const val = counts[k];
+        const pct = (val / ITEMS.length * 100 || 0).toFixed(1);
         const bar = document.getElementById(`bar-${k}`);
-        if(bar) bar.style.width = pct + '%';
-        const val = document.getElementById(`val-${k}`);
-        if(val) val.textContent = counts[k];
+        if (bar) bar.style.width = pct + '%';
+        const display = document.getElementById(`val-${k}`);
+        if (display) display.textContent = val;
     });
 }
 
-function speakEn(txt) {
+function speak(txt) {
+    if (!document.getElementById('voiceToggle').checked) return;
     window.speechSynthesis.cancel();
-    const cleanTxt = txt.replace(/[^a-zA-Z0-9 ]/g, "");
-    const ut = new SpeechSynthesisUtterance(cleanTxt);
-    ut.lang = 'en-US';
-    ut.rate = parseFloat(document.getElementById('rateEn').value) || 1.4;
-    if (enVoice) ut.voice = enVoice;
-    ut.onend = () => {
-        document.getElementById("japaneseWord").classList.add('visible');
-        speakJa(activeWord.ja);
-    };
-    window.speechSynthesis.speak(ut);
-}
-
-function speakJa(txt) {
     const ut = new SpeechSynthesisUtterance(txt);
-    ut.lang = 'ja-JP';
-    ut.rate = 1.6;
-    ut.onend = () => startStressTimer();
+    ut.lang = 'en-US';
+    ut.rate = 1.4;
     window.speechSynthesis.speak(ut);
 }
 
 function startTraining() {
     loadData();
-    const imp = document.getElementById('importArea').value.trim();
-    if (imp) {
-        imp.split(',').forEach(t => {
-            const m = t.match(/(\d+)([abc])/);
-            if (m) mastery[parseInt(m[1])] = m[2];
-        });
-    }
-    saveSettings();
     const start = parseInt(document.getElementById('rangeStart').value);
     const end = parseInt(document.getElementById('rangeEnd').value);
     const limit = parseInt(document.getElementById('testLimit').value);
-    let available = WORDS.filter(w => w.id >= start && w.id <= end);
-    available.sort((x, y) => {
-        const p = (id) => {
-            const s = mastery[id];
-            return s === 'c' ? 1 : (!s ? 1.5 : (s === 'b' ? 2 : 3));
-        };
-        return p(x.id) - p(y.id) || Math.random() - 0.5;
-    });
+    let available = ITEMS.filter(i => i.id >= start && i.id <= end);
+    if (available.length === 0) return alert("NO DATA");
+    available.sort(() => Math.random() - 0.5);
     queue = available.slice(0, limit);
-    if (queue.length === 0) return alert("範囲内に単語がありません");
     results = [];
     document.getElementById("setup").classList.remove('active');
     document.getElementById("app").classList.add('active');
-    nextWord();
+    nextItem();
 }
 
-function nextWord() {
+function nextItem() {
     clearTimeout(stressTimer);
     document.getElementById("timerTrack").classList.remove('active');
     document.getElementById("timerBar").style.width = "0%";
-    document.getElementById("japaneseWord").classList.remove('visible');
+    document.getElementById("aText").classList.remove('visible');
     if (queue.length === 0) return finishTraining();
-    activeWord = queue.shift();
-    const totalCount = results.length + queue.length + 1;
-    document.getElementById("infoText").textContent = `${results.length+1} / ${totalCount}`;
-    document.getElementById("progressBar").style.width = `${(results.length / totalCount) * 100}%`;
-    const badge = document.getElementById("wordBadge");
-    const s = mastery[activeWord.id];
-    badge.textContent = s ? s.toUpperCase() : "NEW";
-    badge.style.color = s === 'c' ? "var(--danger)" : (s === 'b' ? "var(--accent)" : (s === 'a' ? "var(--gold)" : "var(--gray)"));
-    document.getElementById("englishWord").textContent = activeWord.en;
-    document.getElementById("japaneseWord").textContent = activeWord.ja;
-    speakEn(activeWord.en);
+    activeItem = queue.shift();
+    document.getElementById("infoText").textContent = `${results.length + 1} / ${results.length + queue.length + 1}`;
+    document.getElementById("progressBar").style.width = `${(results.length / (results.length + queue.length + 1)) * 100}%`;
+    const status = mastery[activeItem.id];
+    const badge = document.getElementById("itemBadge");
+    badge.textContent = status ? status.toUpperCase() : "NEW";
+    badge.style.color = status === 'c' ? "var(--danger)" : (status === 'b' ? "var(--accent)" : (status === 'a' ? "var(--gold)" : "var(--gray)"));
+    document.getElementById("qText").textContent = activeItem.q;
+    document.getElementById("aText").textContent = activeItem.a;
+    speak(activeItem.q);
+    setTimeout(() => {
+        document.getElementById("aText").classList.add('visible');
+        startStressTimer();
+    }, 800);
 }
 
 function startStressTimer() {
@@ -307,84 +263,50 @@ function startStressTimer() {
 
 function processAnswer(ok) {
     clearTimeout(stressTimer);
-    const id = activeWord.id;
-    if (ok) mastery[id] = (mastery[id] === 'c' ? 'b' : 'a');
-    else mastery[id] = 'c';
-    results.push({ ...activeWord, ok });
-    saveSettings();
-    nextWord();
+    if (!activeItem) return;
+    playSound(ok);
+    const id = activeItem.id;
+    mastery[id] = ok ? (mastery[id] === 'c' ? 'b' : 'a') : 'c';
+    results.push({ id, ok });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mastery));
+    nextItem();
 }
 
 function finishTraining() {
     window.speechSynthesis.cancel();
     document.getElementById("app").classList.remove('active');
     document.getElementById("report").classList.add('active');
-    const okC = results.filter(r => r.ok).length;
-    document.getElementById("resultScore").textContent = `${okC} / ${results.length}`;
-    document.getElementById("wrongListArea").value = results.filter(r => !r.ok).map(m => m.raw).join('\n');
-    document.getElementById("numericalArea").value = Object.keys(mastery).sort((a,b)=>a-b).map(id => `${id}${mastery[id]}`).join(',');
-}
-
-function saveSettings() {
-    localStorage.setItem('gold_mastery', JSON.stringify(mastery));
-    const config = {};
-    ['rangeStart', 'rangeEnd', 'rateEn', 'limitTime', 'testLimit'].forEach(k => config[k] = document.getElementById(k).value);
-    localStorage.setItem('gold_config', JSON.stringify(config));
+    const okCount = results.filter(r => r.ok).length;
+    document.getElementById("resultScore").textContent = `${okCount} / ${results.length}`;
+    document.getElementById("numericalArea").value = Object.keys(mastery).sort((a,b)=>a-b).map(id=>`${id}${mastery[id]}`).join(',');
 }
 
 function adj(id, d) {
     const el = document.getElementById(id);
     el.value = Math.max(1, parseInt(el.value) + d);
-    saveSettings(); updateDashboard();
+    updateDashboard();
 }
 
-function adjF(id, d) {
-    const el = document.getElementById(id);
-    el.value = Math.max(0.1, (parseFloat(el.value) + d)).toFixed(1);
-    saveSettings();
-}
-
-function copyValue(id, btn) {
-    const el = document.getElementById(id);
-    el.select();
-    navigator.clipboard.writeText(el.value).then(() => {
-        const originalText = btn.textContent;
-        btn.textContent = "DONE";
-        setTimeout(() => btn.textContent = originalText, 1000);
+function exportData(btn) {
+    const s = Object.keys(mastery).sort((a,b)=>a-b).map(id=>`${id}${mastery[id]}`).join(',');
+    document.getElementById('importArea').value = s;
+    navigator.clipboard.writeText(s).then(() => {
+        const old = btn.textContent; btn.textContent = "SAVED";
+        setTimeout(() => btn.textContent = old, 1000);
     });
-}
-
-function quickSaveCopy() {
-    saveSettings();
-    const data = Object.keys(mastery).sort((a,b)=>a-b).map(id => `${id}${mastery[id]}`).join(',');
-    navigator.clipboard.writeText(data).then(() => alert("進捗を保存しました"));
-}
-
-function clearImport() {
-    if(confirm("データを全消去しますか？")) { 
-        mastery={}; document.getElementById('importArea').value = '';
-        localStorage.removeItem('gold_mastery'); updateDashboard(); 
-    }
 }
 
 window.onload = () => {
     loadData();
-    const m = localStorage.getItem('gold_mastery');
-    if (m) mastery = JSON.parse(m);
-    const c = localStorage.getItem('gold_config');
-    if (c) {
-        const obj = JSON.parse(c);
-        Object.keys(obj).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = obj[k]; });
-    }
-    setupVoices();
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) mastery = JSON.parse(saved);
     updateDashboard();
 };
 
 document.onkeydown = (e) => {
     if (!document.getElementById("app").classList.contains('active')) return;
-    const k = e.key.toLowerCase();
-    if (k === 'z') processAnswer(true);
-    if (k === 'a') processAnswer(false);
+    if (e.key.toLowerCase() === 'z') processAnswer(true);
+    if (e.key.toLowerCase() === 'a') processAnswer(false);
     if (e.code === 'Space') { e.preventDefault(); finishTraining(); }
 };
 </script>
